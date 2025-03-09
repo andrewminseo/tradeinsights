@@ -879,6 +879,7 @@
         }
         
         .loading {
+            display: none; /* Hide loading by default */
             position: fixed;
             top: 0;
             left: 0;
@@ -886,7 +887,6 @@
             height: 100%;
             background-color: var(--primary-bg);
             opacity: 0.9;
-            display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -960,6 +960,7 @@
     <header class="header">
         <div class="logo">
             <i class="fas fa-chart-line logo-icon"></i>
+            <span>Finance Hub</span>
         </div>
         
         <div class="search-container">
@@ -1047,17 +1048,4 @@
                     </div>
                     <div class="watchlist-item-bottom">
                         <div class="company-name">Meta Platforms Inc.</div>
-                        <div class="change positive">+0.67%</div>
-                    </div>
-                </div>
-                
-                <div class="watchlist-item" data-symbol="NVDA">
-                    <div class="watchlist-item-top">
-                        <div class="ticker">NVDA</div>
-                        <div class="price">878.35</div>
-                    </div>
-                    <div class="watchlist-item-bottom">
-                        <div class="company-name">NVIDIA Corporation</div>
-                        <div class="change positive">+2.34%</div>
-                    </div>
-                </div>
+                        <div class="change positive">+
