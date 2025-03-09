@@ -1,4 +1,257 @@
-<!DOCTYPE html>
+// Generate price prediction
+        function generatePrediction(symbol, priceData, newsData) {
+            // Handle empty or error responses
+            if (!priceData || priceData.Note) {
+                predictionContent.innerHTML = `
+                    <div class="placeholder-text">
+                        <i class="fas fa-robot fa-3x"></i>
+                        <p>Could not generate prediction for ${symbol}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Get time series data
+            const timeSeriesKey = `Time Series (${getIntervalName(currentInterval)})`;
+            const timeSeries = priceData[timeSeriesKey];
+            
+            if (!timeSeries) {
+                predictionContent.innerHTML = `
+                    <div class="placeholder-text">
+                        <i class="fas fa-robot fa-3x"></i>
+                        <p>Insufficient data for prediction</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Generate prediction based on historical data and news sentiment
+            const prediction = simulatePricePrediction(timeSeries, newsData);
+            
+            // Create prediction chart with current and predicted prices
+            const predictionChartHTML = `
+                <div class="prediction-chart">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            `;
+            
+            // Create prediction analysis panel
+            const predictionAnalysisHTML = `
+                <div class="prediction-analysis">
+                    <div class="prediction-title">AI Price Forecast (7-Day)</div>
+                    <div class="prediction-value ${prediction.direction === 'up' ? 'positive' : 'negative'}">
+                        ${prediction.predictedPrice.toFixed(2)} ${prediction.direction === 'up' ? '▲' : '▼'} ${Math.abs(prediction.percentChange).toFixed(2)}%
+                    </div>
+                    
+                    <div>Confidence Level</div>
+                    <div class="confidence-meter">
+                        <div class="confidence-value" style="width: ${prediction.confidence}%"></div>
+                    </div>
+                    <div style="text-align: right; font-size: 0.8rem; margin-bottom: 15px;">
+                        ${prediction.confidence}%
+                    </div>
+                    
+                    <div class="prediction-factors">
+                        <div class="prediction-factor">
+                            <span>Technical Analysis:</span>
+                            <span class="factor-impact ${prediction.technicalImpact}">${formatImpact(prediction.technicalImpact)}</span>
+                        </div>
+                        <div class="prediction-factor">
+                            <span>Sentiment Analysis:</span>
+                            <span class="factor-impact ${prediction.sentimentImpact}">${formatImpact(prediction.sentimentImpact)}</span>
+                        </div>
+                        <div class="prediction-factor">
+                            <span>Market Trend:</span>
+                            <span class="factor-impact ${prediction.marketImpact}">${formatImpact(prediction.marketImpact)}</span>
+                        </div>
+                        <div class="prediction-factor">
+                            <span>Volatility:</span>
+                            <span class="factor-impact ${prediction.volatilityImpact}">${formatImpact(prediction.volatilityImpact)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Update the prediction content
+            predictionContent.innerHTML = predictionChartHTML + predictionAnalysisHTML;
+            
+            // Create prediction chart
+            createPredictionChart(prediction);
+        }
+        
+        // Simulate price prediction (for demo purposes)
+        function simulatePricePrediction(timeSeries, newsData) {
+            const dates = Object.keys(timeSeries).sort().reverse();
+            const currentPrice = parseFloat(timeSeries[dates[0]]['4. close']);
+            
+            // Calculate recent price volatility
+            let volatility = 0;
+            let previousPrice = currentPrice;
+            
+            for (let i = 1; i < Math.min(dates.length, 10); i++) {
+                const price = parseFloat(timeSeries[dates[i]]['4. close']);
+                volatility += Math.abs((price / previousPrice) - 1);
+                previousPrice = price;
+            }
+            
+            volatility = volatility / 10 * 100; // Average daily volatility as percentage
+            
+            // Analyze news sentiment
+            let sentimentScore = 0;
+            
+            if (newsData && newsData.feed) {
+                const recentNews = newsData.feed.slice(0, 5);
+                
+                recentNews.forEach(item => {
+                    const score = item.overall_sentiment_score || Math.random() * 2 - 1; // between -1 and 1
+                    sentimentScore += score;
+                });
+                
+                sentimentScore = sentimentScore / recentNews.length;
+            } else {
+                sentimentScore = Math.random() * 0.4 - 0.2; // Small random sentiment
+            }
+            
+            // Generate impact factors
+            const impacts = ['impact-high', 'impact-medium', 'impact-low'];
+            const technicalImpact = impacts[Math.floor(Math.random() * impacts.length)];
+            const sentimentImpact = impacts[Math.floor(Math.random() * impacts.length)];
+            const marketImpact = impacts[Math.floor(Math.random() * impacts.length)];
+            const volatilityImpact = volatility > 2 ? 'impact-high' : (volatility > 1 ? 'impact-medium' : 'impact-low');
+            
+            // Generate a predicted price change
+            const baseChange = Math.random() * 0.08 - 0.04; // Base change between -4% and +4%
+            const sentimentFactor = sentimentScore * 0.05; // Sentiment influence
+            const volatilityFactor = volatility * 0.01; // Volatility influence
+            
+            const totalChange = baseChange + sentimentFactor + volatilityFactor;
+            const direction = totalChange >= 0 ? 'up' : 'down';
+            const predictedPrice = currentPrice * (1 + totalChange);
+            const percentChange = totalChange * 100;
+            
+            // Generate confidence level
+            const confidence = Math.round(50 + Math.random() * 35); // between 50% and 85%
+            
+            // Generate prediction data for chart
+            const predictionData = generatePredictionData(currentPrice, predictedPrice, 7);
+            
+            return {
+                currentPrice,
+                predictedPrice,
+                percentChange,
+                direction,
+                confidence,
+                technicalImpact,
+                sentimentImpact,
+                marketImpact,
+                volatilityImpact,
+                predictionData
+            };
+        }
+        
+        // Format impact labels
+        function formatImpact(impact) {
+            switch (impact) {
+                case 'impact-high': return 'High Impact';
+                case 'impact-medium': return 'Medium Impact';
+                case 'impact-low': return 'Low Impact';
+                default: return 'Unknown';
+            }
+        }
+        
+        // Generate prediction data points
+        function generatePredictionData(startPrice, endPrice, days) {
+            const data = [];
+            const today = new Date();
+            
+            // Current price
+            data.push({
+                date: today,
+                price: startPrice
+            });
+            
+            // Generate data points for future days
+            for (let i = 1; i <= days; i++) {
+                const date = new Date();
+                date.setDate(today.getDate() + i);
+                
+                // Progress from start to end with some randomness
+                const progress = i / days;
+                const randomFactor = 1 + (Math.random() * 0.02 - 0.01); // +/- 1% random factor
+                const price = startPrice + (endPrice - startPrice) * progress * randomFactor;
+                
+                data.push({
+                    date,
+                    price
+                });
+            }
+            
+            return data;
+        }
+        
+        // Create prediction chart
+        function createPredictionChart(prediction) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            
+            const data = prediction.predictionData;
+            const labels = data.map(item => moment(item.date).format('MM/DD'));
+            const prices = data.map(item => item.price);
+            
+            // Split the data into historical and prediction
+            const historicalData = prices.slice(0, 1);
+            const predictionData = prices.slice(1);
+            
+            const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientFill.addColorStop(0, 'rgba(42, 157, 143, 0.2)');
+            gradientFill.addColorStop(1, 'rgba(42, 157, 143, 0)');
+            
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Current Price',
+                            data: [...historicalData, null, null, null, null, null, null], // Only the current price
+                            borderColor: '#2a9d8f',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#2a9d8f',
+                            pointRadius: 4,
+                            fill: false
+                        },
+                        {
+                            label: 'Price Prediction',
+                            data: [null, ...predictionData], // Start after current price
+                            borderColor: 'rgba(42, 157, 143, 0.7)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointBackgroundColor: 'rgba(42, 157, 143, 0.7)',
+                            pointRadius: 4,
+                            fill: '+1', // Fill below the line
+                            backgroundColor: gradientFill
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                callback: function(value) {
+                                    return '<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -828,6 +1081,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script>
         // DOM Elements
         const searchInput = document.getElementById('searchInput');
@@ -890,6 +1144,144 @@
                 setTimeout(() => document.body.removeChild(notification), 500);
             }, 3000);
         }
+        
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+        
+        function displaySearchResults(matches) {
+            searchResults.innerHTML = '';
+            
+            matches.forEach(match => {
+                const symbol = match['1. symbol'];
+                const name = match['2. name'];
+                const type = match['3. type'];
+                const region = match['4. region'];
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.innerHTML = `
+                    <span class="search-result-symbol">${symbol}</span>
+                    <span>${name}</span>
+                    <span style="color: var(--text-secondary); margin-left: 10px; font-size: 0.8rem;">${type} | ${region}</span>
+                `;
+                
+                resultItem.addEventListener('click', () => {
+                    searchInput.value = symbol;
+                    searchResults.style.display = 'none';
+                    loadStockData(symbol);
+                });
+                
+                searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // Main function to load all stock data
+        async function loadStockData(symbol) {
+            currentSymbol = symbol;
+            showLoading();
+            
+            try {
+                const apiKey = getApiKey();
+                
+                // Fetch company overview
+                const overviewPromise = fetch(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Fetch price data for chart
+                const priceDataPromise = fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_${currentInterval.toUpperCase()}&symbol=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Fetch global quote
+                const quotePromise = fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Fetch news sentiment
+                const newsPromise = fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Wait for all data to load
+                const [overviewData, priceData, quoteData, newsData] = await Promise.all([
+                    overviewPromise,
+                    priceDataPromise,
+                    quotePromise,
+                    newsPromise
+                ]);
+                
+                // Update UI with the data
+                updateStockOverview(overviewData, quoteData);
+                updatePriceChart(priceData);
+                updateNewsContent(newsData);
+                updateTechnicalIndicators(symbol, priceData);
+                generatePrediction(symbol, priceData, newsData);
+                
+                hideLoading();
+                
+                // Check market status
+                checkMarketStatus();
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error loading stock data:', error);
+                showNotification('Error loading stock data', 'error');
+            }
+        }
+        
+        // Update stock overview section
+        function updateStockOverview(overview, quote) {
+            // Handle empty or error responses
+            if (!overview || overview.Note || !quote || quote.Note) {
+                stockOverviewContent.innerHTML = `
+                    <div class="placeholder-text">
+                        <i class="fas fa-exclamation-circle fa-3x"></i>
+                        <p>Could not load stock information for ${currentSymbol}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const globalQuote = quote['Global Quote'];
+            const price = parseFloat(globalQuote?.['05. price']) || 0;
+            const change = parseFloat(globalQuote?.['09. change']) || 0;
+            const changePercent = parseFloat(globalQuote?.['10. change percent']?.replace('%', '')) || 0;
+            
+            const changeClass = change >= 0 ? 'positive' : 'negative';
+            const changeIcon = change >= 0 ? 'fa-caret-up' : 'fa-caret-down';
+            
+            // Create the stock overview content
+            stockOverviewContent.innerHTML = `
+                <div class="stock-info">
+                    <div class="stock-name-price">
+                        <div class="stock-symbol">${overview.Symbol || currentSymbol}</div>
+                        <div class="stock-company">${overview.Name || 'Company Information Not Available'}</div>
+                        <div>
+                            <span class="stock-price">${price.toFixed(2)}</span>
+                            <span class="stock-change ${changeClass}">
+                                <i class="fas ${changeIcon}"></i>
+                                ${Math.abs(change).toFixed(2)} (${Math.abs(changePercent).toFixed(2)}%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stock-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Market Cap</div>
+                        <div class="meta-value">${formatMarketCap(overview.MarketCapitalization)}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">P/E Ratio</div>
+                        <div class="meta-value">${overview.PERatio || 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">EPS</div>
+                        <div class="meta-value">${overview.EPS ? '
 
         // Helper function to get API key
         function getApiKey() {
@@ -904,6 +1296,20 @@
 
         // Search functionality
         searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
         
         function debounce(func, delay) {
             let timeout;
@@ -932,4 +1338,2528 @@
                 hideLoading();
                 
                 if (data.bestMatches && data.bestMatches.length > 0) {
-                    displaySearchResults(data
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + parseFloat(overview.EPS).toFixed(2) : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">52-Week High</div>
+                        <div class="meta-value">${overview['52WeekHigh'] ? '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + parseFloat(overview['52WeekHigh']).toFixed(2) : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">52-Week Low</div>
+                        <div class="meta-value">${overview['52WeekLow'] ? '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + parseFloat(overview['52WeekLow']).toFixed(2) : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Dividend Yield</div>
+                        <div class="meta-value">${overview.DividendYield ? (parseFloat(overview.DividendYield) * 100).toFixed(2) + '%' : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Volume</div>
+                        <div class="meta-value">${formatNumber(globalQuote?.['06. volume'])}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Industry</div>
+                        <div class="meta-value">${overview.Industry || 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Helper function to format market cap
+        function formatMarketCap(marketCap) {
+            if (!marketCap) return 'N/A';
+            
+            marketCap = parseInt(marketCap);
+            if (marketCap >= 1000000000000) {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + (marketCap / 1000000000000).toFixed(2) + 'T';
+            } else if (marketCap >= 1000000000) {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + (marketCap / 1000000000).toFixed(2) + 'B';
+            } else if (marketCap >= 1000000) {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + (marketCap / 1000000).toFixed(2) + 'M';
+            } else {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + marketCap.toLocaleString();
+            }
+        }
+        
+        // Helper function to format numbers
+        function formatNumber(num) {
+            if (!num) return 'N/A';
+            
+            num = parseInt(num);
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(2) + 'B';
+            } else if (num >= 1000000) {
+                return (num / 1000000).toFixed(2) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(2) + 'K';
+            } else {
+                return num.toLocaleString();
+            }
+        }
+        
+        // Update price chart
+        function updatePriceChart(data) {
+            // If current chart exists, destroy it
+            if (priceChartInstance) {
+                priceChartInstance.destroy();
+            }
+            
+            // Handle empty or error responses
+            if (!data || data.Note || !data[`Time Series (${getIntervalName(currentInterval)})`]) {
+                priceChart.innerHTML = `
+                    <div class="placeholder-text">
+                        <i class="fas fa-chart-line fa-3x"></i>
+                        <p>Could not load chart data for ${currentSymbol}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const timeSeriesKey = `Time Series (${getIntervalName(currentInterval)})`;
+            const timeSeries = data[timeSeriesKey];
+            
+            // Process data for chart
+            const chartData = processChartData(timeSeries);
+            
+            // Create canvas for chart
+            priceChart.innerHTML = '<canvas id="stockChart"></canvas>';
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            
+            // Create chart based on current chart type
+            priceChartInstance = createChart(ctx, chartData, currentChartType);
+        }
+        
+        // Helper function to get interval name
+        function getIntervalName(interval) {
+            switch (interval.toLowerCase()) {
+                case '5min': return '5min';
+                case '15min': return '15min';
+                case '30min': return '30min';
+                case '60min': return '60min';
+                case 'daily': return 'Daily';
+                case 'weekly': return 'Weekly';
+                default: return 'Daily';
+            }
+        }
+        
+        // Process chart data
+        function processChartData(timeSeries) {
+            const dates = Object.keys(timeSeries).sort();
+            const prices = [];
+            
+            // Limit to last 100 data points for better visualization
+            const limit = Math.min(dates.length, 100);
+            
+            for (let i = 0; i < limit; i++) {
+                const date = dates[i];
+                const dataPoint = timeSeries[date];
+                
+                prices.push({
+                    date: date,
+                    open: parseFloat(dataPoint['1. open']),
+                    high: parseFloat(dataPoint['2. high']),
+                    low: parseFloat(dataPoint['3. low']),
+                    close: parseFloat(dataPoint['4. close']),
+                    volume: parseInt(dataPoint['5. volume'])
+                });
+            }
+            
+            // Reverse to show oldest to newest
+            return prices.reverse();
+        }
+        
+        // Create chart based on type
+        function createChart(ctx, data, type) {
+            const dates = data.map(item => item.date);
+            const closes = data.map(item => item.close);
+            const opens = data.map(item => item.open);
+            const highs = data.map(item => item.high);
+            const lows = data.map(item => item.low);
+            
+            let chartConfig = {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    return `${label}: ${value.toFixed(2)}`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 0,
+                            hoverRadius: 5
+                        }
+                    }
+                }
+            };
+            
+            // Configure based on chart type
+            if (type === 'line') {
+                chartConfig.data.datasets.push({
+                    label: `${currentSymbol} Price`,
+                    data: closes,
+                    borderColor: '#2a9d8f',
+                    borderWidth: 2,
+                    fill: false
+                });
+            } else if (type === 'area') {
+                chartConfig.data.datasets.push({
+                    label: `${currentSymbol} Price`,
+                    data: closes,
+                    borderColor: '#2a9d8f',
+                    backgroundColor: 'rgba(42, 157, 143, 0.2)',
+                    borderWidth: 2,
+                    fill: true
+                });
+            } else if (type === 'candle') {
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: `${currentSymbol} OHLC`,
+                            data: data.map((item, index) => {
+                                return {
+                                    x: index,
+                                    o: item.open,
+                                    h: item.high,
+                                    l: item.low,
+                                    c: item.close
+                                };
+                            })
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    maxRotation: 0,
+                                    autoSkip: true,
+                                    maxTicksLimit: 10
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks:
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + value.toFixed(2);
+                <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockVision - Market Analysis Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #222222;
+            --terminal-bg: #0d1117;
+            --accent-color: #2a9d8f;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --text-green: #4caf50;
+            --text-red: #f44336;
+            --border-color: #333333;
+            --highlight: #264f78;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / 3;
+            background-color: var(--terminal-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .logo span {
+            color: var(--accent-color);
+        }
+
+        .search-container {
+            flex: 1;
+            margin: 0 20px;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 15px;
+            color: var(--text-primary);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            z-index: 10;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-result-item:hover {
+            background-color: var(--highlight);
+        }
+
+        .search-result-symbol {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu button {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+
+        .sidebar-section h3 {
+            padding: 0 20px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .sidebar-item {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background-color: var(--highlight);
+        }
+
+        .sidebar-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .market-status {
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-live {
+            background-color: var(--text-green);
+        }
+
+        .status-closed {
+            background-color: var(--text-red);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: auto auto 1fr;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .dashboard-card {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            background-color: var(--terminal-bg);
+            padding: 10px 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-header-actions i {
+            margin-left: 10px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .card-header-actions i:hover {
+            color: var(--text-primary);
+        }
+
+        .card-content {
+            padding: 15px;
+            flex: 1;
+            overflow: auto;
+        }
+
+        /* Stock Overview */
+        .stock-overview-card {
+            grid-column: 1 / 4;
+            grid-row: 1 / 2;
+        }
+
+        .stock-info {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .stock-name-price {
+            flex: 1;
+        }
+
+        .stock-symbol {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .stock-company {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .stock-price {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .stock-change {
+            font-size: 1rem;
+        }
+
+        .positive {
+            color: var(--text-green);
+        }
+
+        .negative {
+            color: var(--text-red);
+        }
+
+        .stock-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .meta-item {
+            min-width: 120px;
+        }
+
+        .meta-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .meta-value {
+            font-weight: bold;
+        }
+
+        /* Chart Card */
+        .chart-card {
+            grid-column: 1 / 3;
+            grid-row: 2 / 4;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+        }
+
+        .chart-controls {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .chart-control-group {
+            margin-right: 20px;
+        }
+
+        .chart-control-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .chart-control-buttons {
+            display: flex;
+        }
+
+        .chart-btn {
+            background-color: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .chart-btn:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .chart-btn:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+
+        .chart-btn.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        /* News Card */
+        .news-card {
+            grid-column: 3 / 4;
+            grid-row: 2 / 4;
+        }
+
+        .news-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .news-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .news-source {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .news-sentiment {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .sentiment-positive {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--text-green);
+        }
+
+        .sentiment-negative {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--text-red);
+        }
+
+        .sentiment-neutral {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+        }
+
+        /* Technical Indicators */
+        .indicators-card {
+            grid-column: 1 / 4;
+            grid-row: 4 / 5;
+        }
+
+        .indicators-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .indicator-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .indicator-tab.active {
+            border-bottom-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .indicator-panels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .indicator-item {
+            background-color: var(--terminal-bg);
+            padding: 15px;
+            border-radius: 4px;
+            min-width: 200px;
+            flex: 1;
+        }
+
+        .indicator-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .indicator-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .indicator-signal {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Prediction Card */
+        .prediction-card {
+            grid-column: 1 / 4;
+            grid-row: 5 / 6;
+        }
+
+        .prediction-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .prediction-chart {
+            flex: 2;
+            min-height: 200px;
+        }
+
+        .prediction-analysis {
+            flex: 1;
+            background-color: var(--terminal-bg);
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .prediction-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .prediction-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .confidence-meter {
+            height: 8px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+
+        .confidence-value {
+            height: 100%;
+            background-color: var(--accent-color);
+        }
+
+        .prediction-factors {
+            margin-top: 20px;
+        }
+
+        .prediction-factor {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .factor-impact {
+            font-weight: bold;
+        }
+
+        .impact-high {
+            color: var(--text-green);
+        }
+
+        .impact-medium {
+            color: #ff9800;
+        }
+
+        .impact-low {
+            color: var(--text-red);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid var(--accent-color);
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Placeholder */
+        .placeholder-text {
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 50px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stock-overview-card {
+                grid-column: 1 / 3;
+            }
+
+            .chart-card {
+                grid-column: 1 / 3;
+                grid-row: 2 / 3;
+            }
+
+            .news-card {
+                grid-column: 1 / 3;
+                grid-row: 3 / 4;
+            }
+
+            .indicators-card, .prediction-card {
+                grid-column: 1 / 3;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr;
+            }
+
+            .header {
+                grid-column: 1 / 2;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stock-overview-card, .chart-card, .news-card, .indicators-card, .prediction-card {
+                grid-column: 1 / 2;
+            }
+
+            .prediction-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">STOCK<span>VISION</span></div>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search for stocks (e.g., AAPL, MSFT, GOOGL)" id="searchInput">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            <div class="user-menu">
+                <button id="apiKeyBtn"><i class="fas fa-key"></i> API Key</button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Watchlists</h3>
+                <div class="sidebar-item">
+                    <i class="fas fa-star"></i> Default Watchlist
+                </div>
+                <div class="sidebar-item">
+                    <i class="fas fa-plus"></i> Create Watchlist
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Markets</h3>
+                <div class="sidebar-item">
+                    <i class="fas fa-chart-line"></i> US Market
+                </div>
+                <div class="sidebar-item">
+                    <i class="fas fa-globe-americas"></i> Global Markets
+                </div>
+                <div class="sidebar-item">
+                    <i class="fab fa-bitcoin"></i> Cryptocurrencies
+                </div>
+                <div class="sidebar-item">
+                    <i class="fas fa-money-bill-wave"></i> Forex
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Analysis</h3>
+                <div class="sidebar-item active">
+                    <i class="fas fa-chart-bar"></i> Technical Analysis
+                </div>
+                <div class="sidebar-item">
+                    <i class="fas fa-balance-scale"></i> Fundamental Analysis
+                </div>
+                <div class="sidebar-item">
+                    <i class="fas fa-robot"></i> AI Predictions
+                </div>
+                <div class="sidebar-item">
+                    <i class="fas fa-newspaper"></i> News Analyzer
+                </div>
+            </div>
+
+            <div class="market-status">
+                <span class="status-indicator status-live"></span>
+                <span id="marketStatusText">Market Open</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-grid">
+                <!-- Stock Overview Card -->
+                <div class="dashboard-card stock-overview-card">
+                    <div class="card-header">
+                        <div>Stock Overview</div>
+                        <div class="card-header-actions">
+                            <i class="fas fa-sync-alt" id="refreshOverview"></i>
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    <div class="card-content" id="stockOverviewContent">
+                        <div class="placeholder-text">
+                            <i class="fas fa-search fa-3x"></i>
+                            <p>Search for a stock symbol to see detailed information</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Card -->
+                <div class="dashboard-card chart-card">
+                    <div class="card-header">
+                        <div>Price Chart</div>
+                        <div class="card-header-actions">
+                            <i class="fas fa-expand"></i>
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="chart-controls">
+                            <div class="chart-control-group">
+                                <span class="chart-control-label">Interval</span>
+                                <div class="chart-control-buttons">
+                                    <button class="chart-btn" data-interval="5min">5m</button>
+                                    <button class="chart-btn" data-interval="15min">15m</button>
+                                    <button class="chart-btn" data-interval="30min">30m</button>
+                                    <button class="chart-btn" data-interval="60min">1h</button>
+                                    <button class="chart-btn active" data-interval="daily">1d</button>
+                                    <button class="chart-btn" data-interval="weekly">1w</button>
+                                </div>
+                            </div>
+                            <div class="chart-control-group">
+                                <span class="chart-control-label">Type</span>
+                                <div class="chart-control-buttons">
+                                    <button class="chart-btn active" data-type="line">Line</button>
+                                    <button class="chart-btn" data-type="candle">Candle</button>
+                                    <button class="chart-btn" data-type="area">Area</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="priceChart">
+                            <div class="placeholder-text">
+                                <i class="fas fa-chart-line fa-3x"></i>
+                                <p>Chart will appear when you select a stock</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Card -->
+                <div class="dashboard-card news-card">
+                    <div class="card-header">
+                        <div>News & Sentiment Analysis</div>
+                        <div class="card-header-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    <div class="card-content" id="newsContent">
+                        <div class="placeholder-text">
+                            <i class="fas fa-newspaper fa-3x"></i>
+                            <p>Latest news will appear here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Indicators Card -->
+                <div class="dashboard-card indicators-card">
+                    <div class="card-header">
+                        <div>Technical Indicators</div>
+                        <div class="card-header-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="indicators-tabs">
+                            <div class="indicator-tab active" data-tab="momentum">Momentum</div>
+                            <div class="indicator-tab" data-tab="trend">Trend</div>
+                            <div class="indicator-tab" data-tab="volatility">Volatility</div>
+                            <div class="indicator-tab" data-tab="volume">Volume</div>
+                        </div>
+                        <div class="indicator-panels" id="indicatorPanels">
+                            <div class="placeholder-text">
+                                <i class="fas fa-chart-bar fa-3x"></i>
+                                <p>Technical indicators will be calculated when you select a stock</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prediction Card -->
+                <div class="dashboard-card prediction-card">
+                    <div class="card-header">
+                        <div>Price Prediction & Analysis</div>
+                        <div class="card-header-actions">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="prediction-content" id="predictionContent">
+                            <div class="placeholder-text">
+                                <i class="fas fa-robot fa-3x"></i>
+                                <p>AI-powered price predictions will appear when you select a stock</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Key Modal (hidden by default) -->
+    <div id="apiKeyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: var(--secondary-bg); padding: 20px; border-radius: 5px; width: 90%; max-width: 500px;">
+            <h3 style="margin-bottom: 15px;">Set Alpha Vantage API Key</h3>
+            <p style="margin-bottom: 15px; color: var(--text-secondary);">Enter your Alpha Vantage API key to start fetching real market data.</p>
+            <input type="text" id="apiKeyInput" style="width: 100%; padding: 10px; margin-bottom: 15px; background: var(--terminal-bg); border: 1px solid var(--border-color); color: var(--text-primary);" placeholder="Enter your API key">
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button id="cancelApiKey" style="padding: 8px 15px; background: var(--terminal-bg); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">Cancel</button>
+                <button id="saveApiKey" style="padding: 8px 15px; background: var(--accent-color); border: none; color: white; cursor: pointer;">Save</button>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.8rem; color: var(--text-secondary);">Don't have an API key? <a href="https://www.alphavantage.co/support/#api-key" target="_blank" style="color: var(--accent-color);">Get a free API key</a></p>
+        </div>
+    </div>
+
+    <!-- Loading Overlay (hidden by default) -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script>
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const stockOverviewContent = document.getElementById('stockOverviewContent');
+        const priceChart = document.getElementById('priceChart');
+        const newsContent = document.getElementById('newsContent');
+        const indicatorPanels = document.getElementById('indicatorPanels');
+        const predictionContent = document.getElementById('predictionContent');
+        const apiKeyBtn = document.getElementById('apiKeyBtn');
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const cancelApiKeyBtn = document.getElementById('cancelApiKey');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const marketStatusText = document.getElementById('marketStatusText');
+        const refreshOverviewBtn = document.getElementById('refreshOverview');
+
+        // Chart variables
+        let priceChartInstance = null;
+        let currentSymbol = null;
+        let currentInterval = 'daily';
+        let currentChartType = 'line';
+
+        // API Key handling
+        apiKeyBtn.addEventListener('click', () => {
+            apiKeyModal.style.display = 'flex';
+            apiKeyInput.value = localStorage.getItem('alphavantageApiKey') || '';
+        });
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            const apiKey = apiKeyInput.value.trim();
+            localStorage.setItem('alphavantageApiKey', apiKey);
+            apiKeyModal.style.display = 'none';
+            showNotification('API key saved successfully');
+        });
+
+        cancelApiKeyBtn.addEventListener('click', () => {
+            apiKeyModal.style.display = 'none';
+        });
+
+        // Create notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = type === 'error' ? '#f44336' : '#2a9d8f';
+            notification.style.color = 'white';
+            notification.style.padding = '10px 20px';
+            notification.style.borderRadius = '4px';
+            notification.style.zIndex = '1001';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => document.body.removeChild(notification), 500);
+            }, 3000);
+        }
+        
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+        
+        function displaySearchResults(matches) {
+            searchResults.innerHTML = '';
+            
+            matches.forEach(match => {
+                const symbol = match['1. symbol'];
+                const name = match['2. name'];
+                const type = match['3. type'];
+                const region = match['4. region'];
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.innerHTML = `
+                    <span class="search-result-symbol">${symbol}</span>
+                    <span>${name}</span>
+                    <span style="color: var(--text-secondary); margin-left: 10px; font-size: 0.8rem;">${type} | ${region}</span>
+                `;
+                
+                resultItem.addEventListener('click', () => {
+                    searchInput.value = symbol;
+                    searchResults.style.display = 'none';
+                    loadStockData(symbol);
+                });
+                
+                searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // Main function to load all stock data
+        async function loadStockData(symbol) {
+            currentSymbol = symbol;
+            showLoading();
+            
+            try {
+                const apiKey = getApiKey();
+                
+                // Fetch company overview
+                const overviewPromise = fetch(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Fetch price data for chart
+                const priceDataPromise = fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_${currentInterval.toUpperCase()}&symbol=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Fetch global quote
+                const quotePromise = fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Fetch news sentiment
+                const newsPromise = fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${symbol}&apikey=${apiKey}`)
+                    .then(response => response.json());
+                
+                // Wait for all data to load
+                const [overviewData, priceData, quoteData, newsData] = await Promise.all([
+                    overviewPromise,
+                    priceDataPromise,
+                    quotePromise,
+                    newsPromise
+                ]);
+                
+                // Update UI with the data
+                updateStockOverview(overviewData, quoteData);
+                updatePriceChart(priceData);
+                updateNewsContent(newsData);
+                updateTechnicalIndicators(symbol, priceData);
+                generatePrediction(symbol, priceData, newsData);
+                
+                hideLoading();
+                
+                // Check market status
+                checkMarketStatus();
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error loading stock data:', error);
+                showNotification('Error loading stock data', 'error');
+            }
+        }
+        
+        // Update stock overview section
+        function updateStockOverview(overview, quote) {
+            // Handle empty or error responses
+            if (!overview || overview.Note || !quote || quote.Note) {
+                stockOverviewContent.innerHTML = `
+                    <div class="placeholder-text">
+                        <i class="fas fa-exclamation-circle fa-3x"></i>
+                        <p>Could not load stock information for ${currentSymbol}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const globalQuote = quote['Global Quote'];
+            const price = parseFloat(globalQuote?.['05. price']) || 0;
+            const change = parseFloat(globalQuote?.['09. change']) || 0;
+            const changePercent = parseFloat(globalQuote?.['10. change percent']?.replace('%', '')) || 0;
+            
+            const changeClass = change >= 0 ? 'positive' : 'negative';
+            const changeIcon = change >= 0 ? 'fa-caret-up' : 'fa-caret-down';
+            
+            // Create the stock overview content
+            stockOverviewContent.innerHTML = `
+                <div class="stock-info">
+                    <div class="stock-name-price">
+                        <div class="stock-symbol">${overview.Symbol || currentSymbol}</div>
+                        <div class="stock-company">${overview.Name || 'Company Information Not Available'}</div>
+                        <div>
+                            <span class="stock-price">${price.toFixed(2)}</span>
+                            <span class="stock-change ${changeClass}">
+                                <i class="fas ${changeIcon}"></i>
+                                ${Math.abs(change).toFixed(2)} (${Math.abs(changePercent).toFixed(2)}%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stock-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Market Cap</div>
+                        <div class="meta-value">${formatMarketCap(overview.MarketCapitalization)}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">P/E Ratio</div>
+                        <div class="meta-value">${overview.PERatio || 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">EPS</div>
+                        <div class="meta-value">${overview.EPS ? '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + parseFloat(overview.EPS).toFixed(2) : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">52-Week High</div>
+                        <div class="meta-value">${overview['52WeekHigh'] ? '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + parseFloat(overview['52WeekHigh']).toFixed(2) : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">52-Week Low</div>
+                        <div class="meta-value">${overview['52WeekLow'] ? '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + parseFloat(overview['52WeekLow']).toFixed(2) : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Dividend Yield</div>
+                        <div class="meta-value">${overview.DividendYield ? (parseFloat(overview.DividendYield) * 100).toFixed(2) + '%' : 'N/A'}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Volume</div>
+                        <div class="meta-value">${formatNumber(globalQuote?.['06. volume'])}</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Industry</div>
+                        <div class="meta-value">${overview.Industry || 'N/A'}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Helper function to format market cap
+        function formatMarketCap(marketCap) {
+            if (!marketCap) return 'N/A';
+            
+            marketCap = parseInt(marketCap);
+            if (marketCap >= 1000000000000) {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + (marketCap / 1000000000000).toFixed(2) + 'T';
+            } else if (marketCap >= 1000000000) {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + (marketCap / 1000000000).toFixed(2) + 'B';
+            } else if (marketCap >= 1000000) {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + (marketCap / 1000000).toFixed(2) + 'M';
+            } else {
+                return '
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            } + marketCap.toLocaleString();
+            }
+        }
+        
+        // Helper function to format numbers
+        function formatNumber(num) {
+            if (!num) return 'N/A';
+            
+            num = parseInt(num);
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(2) + 'B';
+            } else if (num >= 1000000) {
+                return (num / 1000000).toFixed(2) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(2) + 'K';
+            } else {
+                return num.toLocaleString();
+            }
+        }
+        
+        // Update price chart
+        function updatePriceChart(data) {
+            // If current chart exists, destroy it
+            if (priceChartInstance) {
+                priceChartInstance.destroy();
+            }
+            
+            // Handle empty or error responses
+            if (!data || data.Note || !data[`Time Series (${getIntervalName(currentInterval)})`]) {
+                priceChart.innerHTML = `
+                    <div class="placeholder-text">
+                        <i class="fas fa-chart-line fa-3x"></i>
+                        <p>Could not load chart data for ${currentSymbol}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const timeSeriesKey = `Time Series (${getIntervalName(currentInterval)})`;
+            const timeSeries = data[timeSeriesKey];
+            
+            // Process data for chart
+            const chartData = processChartData(timeSeries);
+            
+            // Create canvas for chart
+            priceChart.innerHTML = '<canvas id="stockChart"></canvas>';
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            
+            // Create chart based on current chart type
+            priceChartInstance = createChart(ctx, chartData, currentChartType);
+        }
+        
+        // Helper function to get interval name
+        function getIntervalName(interval) {
+            switch (interval.toLowerCase()) {
+                case '5min': return '5min';
+                case '15min': return '15min';
+                case '30min': return '30min';
+                case '60min': return '60min';
+                case 'daily': return 'Daily';
+                case 'weekly': return 'Weekly';
+                default: return 'Daily';
+            }
+        }
+        
+        // Process chart data
+        function processChartData(timeSeries) {
+            const dates = Object.keys(timeSeries).sort();
+            const prices = [];
+            
+            // Limit to last 100 data points for better visualization
+            const limit = Math.min(dates.length, 100);
+            
+            for (let i = 0; i < limit; i++) {
+                const date = dates[i];
+                const dataPoint = timeSeries[date];
+                
+                prices.push({
+                    date: date,
+                    open: parseFloat(dataPoint['1. open']),
+                    high: parseFloat(dataPoint['2. high']),
+                    low: parseFloat(dataPoint['3. low']),
+                    close: parseFloat(dataPoint['4. close']),
+                    volume: parseInt(dataPoint['5. volume'])
+                });
+            }
+            
+            // Reverse to show oldest to newest
+            return prices.reverse();
+        }
+        
+        // Create chart based on type
+        function createChart(ctx, data, type) {
+            const dates = data.map(item => item.date);
+            const closes = data.map(item => item.close);
+            const opens = data.map(item => item.open);
+            const highs = data.map(item => item.high);
+            const lows = data.map(item => item.low);
+            
+            let chartConfig = {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    return `${label}: ${value.toFixed(2)}`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 0,
+                            hoverRadius: 5
+                        }
+                    }
+                }
+            };
+            
+            // Configure based on chart type
+            if (type === 'line') {
+                chartConfig.data.datasets.push({
+                    label: `${currentSymbol} Price`,
+                    data: closes,
+                    borderColor: '#2a9d8f',
+                    borderWidth: 2,
+                    fill: false
+                });
+            } else if (type === 'area') {
+                chartConfig.data.datasets.push({
+                    label: `${currentSymbol} Price`,
+                    data: closes,
+                    borderColor: '#2a9d8f',
+                    backgroundColor: 'rgba(42, 157, 143, 0.2)',
+                    borderWidth: 2,
+                    fill: true
+                });
+            } else if (type === 'candle') {
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: `${currentSymbol} OHLC`,
+                            data: data.map((item, index) => {
+                                return {
+                                    x: index,
+                                    o: item.open,
+                                    h: item.high,
+                                    l: item.low,
+                                    c: item.close
+                                };
+                            })
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    maxRotation: 0,
+                                    autoSkip: true,
+                                    maxTicksLimit: 10
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks:
+
+        // Helper function to get API key
+        function getApiKey() {
+            const key = localStorage.getItem('alphavantageApiKey');
+            if (!key) {
+                showNotification('Please set your Alpha Vantage API key first', 'error');
+                apiKeyModal.style.display = 'flex';
+                throw new Error('API key not set');
+            }
+            return key;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', debounce(handleSearch, 500));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim().length > 0) {
+                const symbol = searchInput.value.trim().toUpperCase();
+                searchResults.style.display = 'none';
+                loadStockData(symbol);
+            }
+        });
+        
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+        
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = getApiKey();
+                showLoading();
+                
+                const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${apiKey}`);
+                const data = await response.json();
+                
+                hideLoading();
+                
+                if (data.bestMatches && data.bestMatches.length > 0) {
+                    displaySearchResults(data.bestMatches);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Search error:', error);
+                showNotification('Error searching for stocks', 'error');
+            }
