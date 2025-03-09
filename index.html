@@ -993,7 +993,539 @@
                     </div>
                     <div class="watchlist-item-bottom">
                         <div class="company-name">Apple Inc.</div>
-                        <div class="change positive">+1.45%</div>
+                        <div class="change positive">+0.67%</div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item" data-symbol="NVDA">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">NVDA</div>
+                        <div class="price">878.35</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">NVIDIA Corporation</div>
+                        <div class="change positive">+2.34%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="card stock-header">
+                <div class="card-body">
+                    <div class="stock-title-container">
+                        <div class="stock-name-container">
+                            <div class="stock-symbol">AAPL</div>
+                            <div class="stock-company">Apple Inc.</div>
+                        </div>
+                        <div class="stock-price-container">
+                            <div class="stock-price">187.32</div>
+                            <div class="stock-change-container">
+                                <div class="stock-change-amount positive">+2.68</div>
+                                <div class="stock-change-percent positive">+1.45%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-summary">
+                        <div class="summary-item">
+                            <div class="summary-label">Previous Close</div>
+                            <div class="summary-value">184.64</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Open</div>
+                            <div class="summary-value">185.42</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Day Range</div>
+                            <div class="summary-value">184.73 - 188.04</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">52 Week Range</div>
+                            <div class="summary-value">158.77 - 199.62</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Volume</div>
+                            <div class="summary-value">46.23M</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Avg. Volume</div>
+                            <div class="summary-value">54.76M</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Market Cap</div>
+                            <div class="summary-value">2.89T</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">P/E Ratio</div>
+                            <div class="summary-value">29.15</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Dividend Yield</div>
+                            <div class="summary-value">0.53%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card chart-container">
+                <div class="card-body">
+                    <div class="chart-tab-container">
+                        <div class="chart-tab active">Price</div>
+                        <div class="chart-tab">Volume</div>
+                        <div class="chart-tab">Comparison</div>
+                    </div>
+                    
+                    <div class="chart-period-container">
+                        <div class="chart-period">1D</div>
+                        <div class="chart-period">5D</div>
+                        <div class="chart-period active">1M</div>
+                        <div class="chart-period">3M</div>
+                        <div class="chart-period">6M</div>
+                        <div class="chart-period">1Y</div>
+                        <div class="chart-period">5Y</div>
+                        <div class="chart-period">MAX</div>
+                    </div>
+                    
+                    <div class="chart-wrapper">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card news-container">
+                <div class="card-header">
+                    <div class="card-title">News & Analysis</div>
+                </div>
+                <div class="card-body">
+                    <div class="news-filters">
+                        <div class="news-filter active">All</div>
+                        <div class="news-filter">Company News</div>
+                        <div class="news-filter">Market News</div>
+                        <div class="news-filter">Analysis</div>
+                    </div>
+                    
+                    <div class="news-list">
+                        <div class="news-item" data-id="1">
+                            <div class="news-item-header">
+                                <div class="news-source">Bloomberg</div>
+                                <div class="news-time">2h ago</div>
+                            </div>
+                            <div class="news-title">Apple's Vision Pro Sales Exceed Expectations in First Quarter</div>
+                            <div class="news-meta">
+                                <div class="news-credibility credibility-high"><i class="fas fa-check-circle"></i> High</div>
+                                <div class="news-impact impact-positive"><i class="fas fa-arrow-up"></i> Positive</div>
+                            </div>
+                        </div>
+                        
+                        <div class="news-item" data-id="2">
+                            <div class="news-item-header">
+                                <div class="news-source">Wall Street Journal</div>
+                                <div class="news-time">5h ago</div>
+                            </div>
+                            <div class="news-title">Tech Stocks Rally as Fed Signals Potential Rate Cut</div>
+                            <div class="news-meta">
+                                <div class="news-credibility credibility-high"><i class="fas fa-check-circle"></i> High</div>
+                                <div class="news-impact impact-positive"><i class="fas fa-arrow-up"></i> Positive</div>
+                            </div>
+                        </div>
+                        
+                        <div class="news-item" data-id="3">
+                            <div class="news-item-header">
+                                <div class="news-source">CNBC</div>
+                                <div class="news-time">8h ago</div>
+                            </div>
+                            <div class="news-title">Apple's iPhone Production in India Reaches New Milestone</div>
+                            <div class="news-meta">
+                                <div class="news-credibility credibility-high"><i class="fas fa-check-circle"></i> High</div>
+                                <div class="news-impact impact-positive"><i class="fas fa-arrow-up"></i> Positive</div>
+                            </div>
+                        </div>
+                        
+                        <div class="news-item" data-id="4">
+                            <div class="news-item-header">
+                                <div class="news-source">Financial Times</div>
+                                <div class="news-time">10h ago</div>
+                            </div>
+                            <div class="news-title">Supply Chain Constraints Could Impact Q3 Product Launches</div>
+                            <div class="news-meta">
+                                <div class="news-credibility credibility-medium"><i class="fas fa-info-circle"></i> Medium</div>
+                                <div class="news-impact impact-negative"><i class="fas fa-arrow-down"></i> Negative</div>
+                            </div>
+                        </div>
+                        
+                        <div class="news-item" data-id="5">
+                            <div class="news-item-header">
+                                <div class="news-source">Reuters</div>
+                                <div class="news-time">12h ago</div>
+                            </div>
+                            <div class="news-title">Apple Expands AI Capabilities in Upcoming Software Update</div>
+                            <div class="news-meta">
+                                <div class="news-credibility credibility-high"><i class="fas fa-check-circle"></i> High</div>
+                                <div class="news-impact impact-positive"><i class="fas fa-arrow-up"></i> Positive</div>
+                            </div>
+                        </div>
+                        
+                        <div class="news-item" data-id="6">
+                            <div class="news-item-header">
+                                <div class="news-source">Market Watch</div>
+                                <div class="news-time">1d ago</div>
+                            </div>
+                            <div class="news-title">Analysts Raise Price Targets Following Strong Earnings</div>
+                            <div class="news-meta">
+                                <div class="news-credibility credibility-medium"><i class="fas fa-info-circle"></i> Medium</div>
+                                <div class="news-impact impact-positive"><i class="fas fa-arrow-up"></i> Positive</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="article-sidebar">
+        <div class="article-header">
+            <div class="card-title">News Article</div>
+            <div class="article-close"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="article-content">
+            <div class="article-title">Apple's Vision Pro Sales Exceed Expectations in First Quarter</div>
+            <div class="article-metadata">
+                <div class="article-source-date">
+                    <div class="article-source">Bloomberg</div>
+                    <div class="article-date">March 9, 2025</div>
+                </div>
+                <div class="article-credibility">
+                    <div class="news-credibility credibility-high"><i class="fas fa-check-circle"></i> High Credibility</div>
+                </div>
+            </div>
+            
+            <div class="key-highlight">
+                Apple's new mixed reality headset, Vision Pro, has exceeded analysts' sales expectations by 35% in its first full quarter of availability.
+            </div>
+            
+            <div class="article-text">
+                <p>Apple Inc.'s ambitious foray into mixed reality with its <span class="highlighted highlight-positive">Vision Pro headset has significantly outperformed initial sales projections</span>, according to people familiar with the matter. The $3,499 device, which blends virtual and augmented reality, shipped approximately 350,000 units in its first full quarter of availability, exceeding analyst expectations by roughly 35%.</p>
+                
+                <p>The stronger-than-expected demand suggests Apple may have found a foothold in the nascent mixed reality market, despite initial concerns about the high price point. Analysts from Morgan Stanley noted that the <span class="highlighted highlight-positive">adoption rate is tracking ahead of the original Apple Watch's launch trajectory</span> when adjusted for price consideration.</p>
+                
+                <p>"The Vision Pro is demonstrating stronger appeal among both developers and consumers than we initially anticipated," said Sarah Chen, technology analyst at Morgan Stanley. "While it remains a niche product, the robust demand signals potential for this to evolve into Apple's next major product category."</p>
+                
+                <p>Software development for the platform has also accelerated, with the App Store now featuring over 1,200 applications specifically optimized for the Vision Pro interface. Major players including Adobe, Microsoft, and Unity have released or announced significant applications for the platform.</p>
+                
+                <p>The success comes despite <span class="highlighted highlight-negative">ongoing supply chain constraints affecting certain custom display components</span>, which has limited Apple's ability to fully meet demand in some regions. These constraints are expected to ease in the coming quarter as manufacturing partners ramp up production capacity.</p>
+                
+                <p>Apple CEO Tim Cook highlighted the Vision Pro during the company's recent earnings call, noting that customer satisfaction scores for the device were "off the charts" and that the company was seeing "use cases we hadn't even imagined."</p>
+            </div>
+            
+            <div class="article-analysis">
+                <div class="analysis-title">Financial Analysis</div>
+                
+                <div class="analysis-item">
+                    <div class="analysis-item-title"><i class="fas fa-chart-line"></i> Market Impact</div>
+                    <p>The stronger-than-expected Vision Pro sales could contribute an additional $1.2B in revenue for fiscal year 2025, representing approximately 0.4% of Apple's projected annual revenue. While modest in the context of Apple's overall business, it establishes a foundation for the company's AR/VR ecosystem.</p>
+                </div>
+                
+                <div class="analysis-item">
+                    <div class="analysis-item-title"><i class="fas fa-lightbulb"></i> Strategic Significance</div>
+                    <p>The Vision Pro represents Apple's first major new product category since the Apple Watch launched in 2015. Success here validates the company's long-term investment in AR/VR technologies and positions Apple to compete in spatial computing, potentially the next major computing paradigm.</p>
+                </div>
+                
+                <div class="analysis-item">
+                    <div class="analysis-item-title"><i class="fas fa-eye"></i> Outlook</div>
+                    <p>If Apple follows its established product strategy, we can expect a more affordable Vision device within 18-24 months, which would significantly expand the addressable market. The successful developer adoption suggests a robust ecosystem is forming, which has historically been critical to Apple's platform success.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const searchInput = document.querySelector('.search-input');
+        const searchResults = document.querySelector('.search-results');
+        const themeToggle = document.querySelector('.theme-toggle');
+        const watchlistItems = document.querySelectorAll('.watchlist-item');
+        const chartTabs = document.querySelectorAll('.chart-tab');
+        const chartPeriods = document.querySelectorAll('.chart-period');
+        const newsFilters = document.querySelectorAll('.news-filter');
+        const newsItems = document.querySelectorAll('.news-item');
+        const articleSidebar = document.querySelector('.article-sidebar');
+        const articleClose = document.querySelector('.article-close');
+        const loadingScreen = document.querySelector('.loading');
+        
+        // Sample stock data for chart
+        const stockData = {
+            labels: Array.from({length: 30}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - 29 + i);
+                return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+            }),
+            datasets: [{
+                label: 'AAPL',
+                data: [
+                    172.50, 173.22, 175.04, 174.79, 176.38, 178.61, 177.97, 178.72, 
+                    177.15, 176.42, 177.83, 179.23, 180.95, 180.59, 181.16, 182.63, 
+                    182.89, 183.58, 182.41, 184.37, 185.14, 183.86, 182.12, 183.79, 
+                    184.64, 184.37, 185.42, 186.17, 185.23, 187.32
+                ],
+                borderColor: '#0099ff',
+                backgroundColor: 'rgba(0, 153, 255, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.2,
+                pointRadius: 0,
+                pointHoverRadius: 5
+            }]
+        };
+        
+        // Stock search data
+        const stockSearchData = [
+            { symbol: 'AAPL', name: 'Apple Inc.' },
+            { symbol: 'MSFT', name: 'Microsoft Corporation' },
+            { symbol: 'GOOGL', name: 'Alphabet Inc.' },
+            { symbol: 'AMZN', name: 'Amazon.com Inc.' },
+            { symbol: 'META', name: 'Meta Platforms Inc.' },
+            { symbol: 'TSLA', name: 'Tesla, Inc.' },
+            { symbol: 'NVDA', name: 'NVIDIA Corporation' },
+            { symbol: 'JPM', name: 'JPMorgan Chase & Co.' },
+            { symbol: 'V', name: 'Visa Inc.' },
+            { symbol: 'WMT', name: 'Walmart Inc.' },
+            { symbol: 'JNJ', name: 'Johnson & Johnson' },
+            { symbol: 'PG', name: 'Procter & Gamble Co.' }
+        ];
+        
+        // Initialize Price Chart
+        function initChart() {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            // Check if Chart.js is loaded
+            if (typeof Chart !== 'undefined') {
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: stockData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'var(--card-bg)',
+                                titleColor: 'var(--primary-text)',
+                                bodyColor: 'var(--primary-text)',
+                                borderColor: 'var(--border-color)',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: 'var(--secondary-text)',
+                                    maxRotation: 0,
+                                    autoSkip: true,
+                                    maxTicksLimit: 8
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'var(--chart-grid)'
+                                },
+                                ticks: {
+                                    color: 'var(--secondary-text)'
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        },
+                        animation: {
+                            duration: 1000
+                        }
+                    }
+                });
+            } else {
+                console.error('Chart.js not loaded');
+            }
+        }
+        
+        // Search functionality
+        searchInput.addEventListener('focus', () => {
+            searchResults.style.display = 'block';
+            populateSearchResults();
+        });
+        
+        searchInput.addEventListener('input', () => {
+            populateSearchResults();
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        function populateSearchResults() {
+            const query = searchInput.value.toLowerCase();
+            
+            // Clear previous results
+            searchResults.innerHTML = '';
+            
+            // Filter and populate results
+            const filteredStocks = query ? 
+                stockSearchData.filter(stock => 
+                    stock.symbol.toLowerCase().includes(query) || 
+                    stock.name.toLowerCase().includes(query)
+                ) : 
+                stockSearchData.slice(0, 5);
+            
+            filteredStocks.forEach(stock => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.dataset.symbol = stock.symbol;
+                
+                resultItem.innerHTML = `
+                    <div>
+                        <div class="result-symbol">${stock.symbol}</div>
+                        <div class="result-name">${stock.name}</div>
+                    </div>
+                `;
+                
+                resultItem.addEventListener('click', () => {
+                    loadStock(stock.symbol);
+                    searchResults.style.display = 'none';
+                    searchInput.value = '';
+                });
+                
+                searchResults.appendChild(resultItem);
+            });
+        }
+        
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            const html = document.documentElement;
+            const isDarkTheme = html.getAttribute('data-theme') === 'dark';
+            const newTheme = isDarkTheme ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            themeToggle.innerHTML = isDarkTheme ? 
+                '<i class="fas fa-moon"></i>' : 
+                '<i class="fas fa-sun"></i>';
+        });
+        
+        // Watchlist item click
+        watchlistItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const symbol = item.dataset.symbol;
+                loadStock(symbol);
+            });
+        });
+        
+        // Chart tab switching
+        chartTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                chartTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                // Would update chart data based on selected tab
+            });
+        });
+        
+        // Chart period switching
+        chartPeriods.forEach(period => {
+            period.addEventListener('click', () => {
+                chartPeriods.forEach(p => p.classList.remove('active'));
+                period.classList.add('active');
+                // Would update chart data based on selected period
+            });
+        });
+        
+        // News filters
+        newsFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                newsFilters.forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+                // Would filter news items based on selected filter
+            });
+        });
+        
+        // News item click
+        newsItems.forEach(item => {
+            item.addEventListener('click', () => {
+                articleSidebar.classList.add('active');
+                // Would load article content based on item.dataset.id
+            });
+        });
+        
+        // Close article sidebar
+        articleClose.addEventListener('click', () => {
+            articleSidebar.classList.remove('active');
+        });
+        
+        // Simulate loading a stock
+        function loadStock(symbol) {
+            // Show loading screen
+            loadingScreen.style.display = 'flex';
+            
+            // Find stock data
+            const stockItem = Array.from(watchlistItems).find(item => item.dataset.symbol === symbol);
+            
+            // Update UI after a short delay (simulating API call)
+            setTimeout(() => {
+                if (stockItem) {
+                    const ticker = stockItem.querySelector('.ticker').textContent;
+                    const price = stockItem.querySelector('.price').textContent;
+                    const companyName = stockItem.querySelector('.company-name').textContent;
+                    const change = stockItem.querySelector('.change').textContent;
+                    const isPositive = stockItem.querySelector('.change').classList.contains('positive');
+                    
+                    // Update stock header
+                    document.querySelector('.stock-symbol').textContent = ticker;
+                    document.querySelector('.stock-company').textContent = companyName;
+                    document.querySelector('.stock-price').textContent = price;
+                    
+                    const changeAmount = change.split('%')[0];
+                    document.querySelector('.stock-change-amount').textContent = isPositive ? 
+                        `+${(parseFloat(price) * parseFloat(changeAmount.replace('+', '')) / 100).toFixed(2)}` : 
+                        `${(parseFloat(price) * parseFloat(changeAmount.replace('-', '')) / 100).toFixed(2)}`;
+                    
+                    document.querySelector('.stock-change-percent').textContent = change;
+                    
+                    document.querySelector('.stock-change-amount').className = `stock-change-amount ${isPositive ? 'positive' : 'negative'}`;
+                    document.querySelector('.stock-change-percent').className = `stock-change-percent ${isPositive ? 'positive' : 'negative'}`;
+                    
+                    // Would update chart data here
+                }
+                
+                // Hide loading screen
+                loadingScreen.style.display = 'none';
+            }, 800);
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            
+            // Set current date
+            const today = new Date();
+            document.querySelector('.current-date').textContent = today.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            }).toUpperCase();
+            
+            // Simulate initial stock loading
+            loadStock('AAPL');
+        });
+    </script>
+</body>
+</html>1.45%</div>
                     </div>
                 </div>
                 
