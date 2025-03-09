@@ -1,275 +1,478 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockVision Terminal</title>
+    <title>Finance Hub</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <style>
         :root {
-            --primary-bg: #101010;
-            --secondary-bg: #1a1a1a;
-            --terminal-green: #0fbf00;
-            --accent-color: #0080ff;
-            --text-color: #e0e0e0;
-            --secondary-text: #999999;
-            --danger-color: #ff3b30;
-            --success-color: #34c759;
-            --grid-color: #222;
-            --highlight-color: #333;
-            --header-height: 55px;
+            /* Dark theme variables */
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --card-bg: #242424;
+            --hover-bg: #2a2a2a;
+            --border-color: #383838;
+            --primary-text: #e0e0e0;
+            --secondary-text: #a0a0a0;
+            --accent-color: #0099ff;
+            --success-color: #00c853;
+            --danger-color: #ff3d00;
+            --neutral-color: #ffab00;
+            --chart-grid: #333;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="light"] {
+            --primary-bg: #f5f5f5;
+            --secondary-bg: #ffffff;
+            --card-bg: #ffffff;
+            --hover-bg: #f0f0f0;
+            --border-color: #e0e0e0;
+            --primary-text: #212121;
+            --secondary-text: #757575;
+            --accent-color: #0078d4;
+            --success-color: #00a651;
+            --danger-color: #d50000;
+            --neutral-color: #ff8f00;
+            --chart-grid: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         
         body {
             background-color: var(--primary-bg);
-            color: var(--text-color);
-            width: 100%;
+            color: var(--primary-text);
+            transition: background-color 0.3s ease;
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
         
-        header {
-            height: var(--header-height);
-            background-color: var(--secondary-bg);
-            border-bottom: 1px solid #333;
+        .header {
             display: flex;
             align-items: center;
-            padding: 0 20px;
             justify-content: space-between;
+            padding: 12px 20px;
+            background-color: var(--secondary-bg);
+            border-bottom: 1px solid var(--border-color);
+            height: 60px;
         }
         
         .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--terminal-green);
             display: flex;
             align-items: center;
         }
         
-        .logo i {
-            margin-right: 10px;
-        }
-        
-        .date-time {
-            display: flex;
-            font-size: 14px;
-            color: var(--secondary-text);
-        }
-        
-        .date, .time {
-            margin-left: 15px;
+        .logo-icon {
+            color: var(--accent-color);
+            font-size: 24px;
+            margin-right: 6px;
         }
         
         .search-container {
-            flex: 1;
-            max-width: 500px;
-            margin: 0 20px;
             position: relative;
+            width: 400px;
         }
         
         .search-input {
-            background-color: var(--secondary-bg);
-            color: var(--text-color);
-            border: 1px solid #333;
-            height: 32px;
             width: 100%;
-            padding: 0 15px;
+            padding: 10px 40px 10px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
             font-size: 14px;
             outline: none;
         }
         
-        .search-input:focus {
-            border-color: var(--accent-color);
+        .search-input::placeholder {
+            color: var(--secondary-text);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-text);
         }
         
         .search-results {
             position: absolute;
+            top: 100%;
+            left: 0;
             width: 100%;
             background-color: var(--secondary-bg);
-            border: 1px solid #333;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-top: 5px;
             max-height: 300px;
             overflow-y: auto;
             z-index: 100;
             display: none;
+            box-shadow: 0 4px 12px var(--shadow-color);
         }
         
         .search-result-item {
-            padding: 8px 15px;
+            padding: 10px 15px;
             cursor: pointer;
-            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .search-result-item:hover {
-            background-color: var(--highlight-color);
+            background-color: var(--hover-bg);
         }
         
-        .news-source-selector {
+        .result-symbol {
+            font-weight: 600;
+        }
+        
+        .result-name {
+            color: var(--secondary-text);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        
+        .header-right {
             display: flex;
             align-items: center;
         }
         
-        .news-source-label {
-            margin-right: 10px;
-            font-size: 14px;
+        .theme-toggle {
+            margin-right: 15px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            width: 34px;
+            height: 34px;
+        }
+        
+        .date-time {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-left: 15px;
+        }
+        
+        .market-status {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--success-color);
+        }
+        
+        .current-date {
+            font-size: 12px;
             color: var(--secondary-text);
         }
         
-        .news-source-select {
-            background-color: var(--secondary-bg);
-            color: var(--text-color);
-            border: 1px solid #333;
-            height: 28px;
-            padding: 0 10px;
-            outline: none;
-        }
-        
         .main-container {
+            flex: 1;
             display: flex;
-            height: calc(100vh - var(--header-height));
+            overflow: hidden;
         }
         
         .sidebar {
             width: 220px;
             background-color: var(--secondary-bg);
-            border-right: 1px solid #333;
+            border-right: 1px solid var(--border-color);
             overflow-y: auto;
+            transition: transform 0.3s ease;
         }
         
-        .watchlist {
+        .sidebar-section {
             padding: 15px;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .section-title {
             font-size: 14px;
-            color: var(--accent-color);
+            font-weight: 600;
             margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: var(--primary-text);
         }
         
         .watchlist-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 8px;
+            padding: 10px;
             border-radius: 4px;
+            margin-bottom: 10px;
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
         
         .watchlist-item:hover {
-            background-color: var(--highlight-color);
+            background-color: var(--hover-bg);
         }
         
-        .stock-symbol {
-            font-weight: bold;
+        .watchlist-item-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
         }
         
-        .stock-price {
-            font-weight: normal;
+        .ticker {
+            font-weight: 600;
         }
         
-        .stock-change.positive {
+        .price {
+            font-weight: 600;
+        }
+        
+        .watchlist-item-bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        
+        .company-name {
+            color: var(--secondary-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+        
+        .change {
+            font-weight: 500;
+        }
+        
+        .positive {
             color: var(--success-color);
         }
         
-        .stock-change.negative {
+        .negative {
             color: var(--danger-color);
         }
         
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
             display: grid;
             grid-template-columns: 2fr 1fr;
-            grid-template-rows: auto 1fr 1fr;
+            grid-template-rows: auto 1fr;
             gap: 15px;
+            padding: 15px;
             height: 100%;
         }
         
-        .widget {
-            background-color: var(--secondary-bg);
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 15px;
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow-color);
             overflow: hidden;
         }
         
-        .stock-header {
-            grid-column: 1 / -1;
+        .card-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .stock-title {
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 15px;
+        }
+        
+        .stock-header {
+            grid-column: 1 / -1;
             display: flex;
-            align-items: baseline;
+            flex-direction: column;
         }
         
-        .stock-name {
-            font-size: 24px;
-            font-weight: bold;
-            margin-right: 10px;
+        .stock-title-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
         }
         
-        .stock-full-name {
+        .stock-name-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stock-symbol {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stock-company {
             font-size: 14px;
             color: var(--secondary-text);
         }
         
-        .stock-info {
+        .stock-price-container {
             display: flex;
-            align-items: baseline;
+            flex-direction: column;
+            align-items: flex-end;
         }
         
-        .current-price {
-            font-size: 24px;
-            font-weight: bold;
-            margin-right: 10px;
+        .stock-price {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
         }
         
-        .price-change {
-            font-size: 16px;
+        .stock-change-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .stock-change-amount {
+            margin-right: 8px;
+        }
+        
+        .stock-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-bottom: 3px;
+        }
+        
+        .summary-value {
+            font-weight: 600;
         }
         
         .chart-container {
-            grid-row: 2 / 3;
             grid-column: 1 / 2;
-            position: relative;
+            grid-row: 2 / 3;
             height: 100%;
+            position: relative;
+        }
+        
+        .chart-tab-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .chart-tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .chart-tab.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+        
+        .chart-period-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .chart-period {
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 4px;
+            margin-right: 5px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .chart-period:hover {
+            background-color: var(--hover-bg);
+        }
+        
+        .chart-period.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .chart-wrapper {
+            height: calc(100% - 80px);
         }
         
         .news-container {
-            grid-row: 2 / -1;
             grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .news-filters {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .news-filter {
+            font-size: 13px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 5px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .news-filter:hover {
+            background-color: var(--hover-bg);
+        }
+        
+        .news-filter.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .news-list {
             overflow-y: auto;
+            flex: 1;
         }
         
         .news-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #333;
-        }
-        
-        .news-title {
-            font-weight: bold;
-            margin-bottom: 5px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
         
-        .news-title:hover {
-            text-decoration: underline;
+        .news-item:hover {
+            background-color: var(--hover-bg);
+        }
+        
+        .news-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
         }
         
         .news-source {
@@ -280,12 +483,37 @@
         .news-time {
             font-size: 12px;
             color: var(--secondary-text);
-            margin-left: 10px;
+        }
+        
+        .news-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        
+        .news-meta {
+            display: flex;
+            font-size: 12px;
+            margin-top: 4px;
         }
         
         .news-credibility {
-            font-size: 12px;
-            margin-top: 5px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .news-credibility i {
+            margin-right: 3px;
+        }
+        
+        .news-impact {
+            display: flex;
+            align-items: center;
+        }
+        
+        .news-impact i {
+            margin-right: 3px;
         }
         
         .credibility-high {
@@ -293,141 +521,381 @@
         }
         
         .credibility-medium {
-            color: orange;
+            color: var(--neutral-color);
         }
         
         .credibility-low {
             color: var(--danger-color);
         }
         
-        .analysis-container {
-            grid-row: 3 / 4;
-            grid-column: 1 / 2;
-            display: flex;
-            flex-direction: column;
+        .impact-positive {
+            color: var(--success-color);
         }
         
-        .tab-container {
+        .impact-neutral {
+            color: var(--neutral-color);
+        }
+        
+        .impact-negative {
+            color: var(--danger-color);
+        }
+        
+        .article-sidebar {
+            position: fixed;
+            top: 0;
+            right: -650px;
+            width: 650px;
+            height: 100%;
+            background-color: var(--secondary-bg);
+            box-shadow: -2px 0 10px var(--shadow-color);
+            z-index: 1000;
+            transition: right 0.3s ease;
             display: flex;
-            border-bottom: 1px solid #333;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .article-sidebar.active {
+            right: 0;
+        }
+        
+        .article-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .article-close {
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+        }
+        
+        .article-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .article-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        
+        .article-metadata {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--secondary-text);
+        }
+        
+        .article-source-date {
+            display: flex;
+        }
+        
+        .article-source {
+            margin-right: 10px;
+            font-weight: 600;
+        }
+        
+        .article-analysis {
+            margin-top: 30px;
+        }
+        
+        .analysis-title {
+            font-size: 16px;
+            font-weight: 600;
             margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+        
+        .analysis-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+        }
+        
+        .analysis-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .analysis-item-title i {
+            margin-right: 5px;
+        }
+        
+        .key-highlight {
+            background-color: rgba(255, 171, 0, 0.2);
+            border-left: 3px solid var(--neutral-color);
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .article-text {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .article-text p {
+            margin-bottom: 15px;
+        }
+        
+        .highlighted {
+            background-color: rgba(0, 153, 255, 0.15);
+            padding: 2px 0;
+        }
+        
+        .highlight-positive {
+            background-color: rgba(0, 200, 83, 0.15);
+        }
+        
+        .highlight-negative {
+            background-color: rgba(255, 61, 0, 0.15);
+        }
+        
+        .tabs-container {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .tab {
-            padding: 8px 15px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
             cursor: pointer;
-            margin-right: 5px;
             border-bottom: 2px solid transparent;
         }
         
         .tab.active {
-            border-bottom: 2px solid var(--accent-color);
             color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
         }
         
         .tab-content {
-            flex: 1;
-            overflow-y: auto;
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
+            margin-bottom: 20px;
         }
         
         .metric-card {
-            padding: 10px;
-            background-color: var(--highlight-color);
-            border-radius: 4px;
+            padding: 15px;
+            background-color: var(--hover-bg);
+            border-radius: 8px;
         }
         
         .metric-title {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--secondary-text);
             margin-bottom: 5px;
         }
         
         .metric-value {
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 600;
         }
         
-        .prediction-container {
-            margin-top: 15px;
+        .financial-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
         }
         
-        .prediction-title {
-            font-size: 14px;
-            color: var(--accent-color);
-            margin-bottom: 10px;
+        .financial-table th {
+            text-align: left;
+            padding: 10px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
         }
         
-        .prediction-content {
+        .financial-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .financial-table td:last-child {
+            text-align: right;
+        }
+        
+        .signal-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: var(--hover-bg);
+            border-radius: 8px;
+        }
+        
+        .signal-name {
             display: flex;
             justify-content: space-between;
-            background-color: var(--highlight-color);
-            padding: 10px;
-            border-radius: 4px;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
         
-        .prediction-target {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .prediction-label {
+        .signal-status {
             font-size: 12px;
-            color: var(--secondary-text);
+            padding: 3px 8px;
+            border-radius: 12px;
         }
         
-        .prediction-value {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .prediction-confidence {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-        
-        .trend-indicator {
-            display: flex;
-            align-items: center;
-            margin-top: 5px;
-        }
-        
-        .trend-indicator i {
-            margin-right: 5px;
-        }
-        
-        .trend-up {
+        .signal-status.bullish {
+            background-color: rgba(0, 200, 83, 0.2);
             color: var(--success-color);
         }
         
-        .trend-down {
+        .signal-status.bearish {
+            background-color: rgba(255, 61, 0, 0.2);
             color: var(--danger-color);
         }
         
-        /* Loading animation */
-        .loading {
+        .signal-status.neutral {
+            background-color: rgba(255, 171, 0, 0.2);
+            color: var(--neutral-color);
+        }
+        
+        .signal-desc {
+            font-size: 13px;
+            color: var(--secondary-text);
+        }
+        
+        .option-strategy {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--hover-bg);
+            border-radius: 8px;
+        }
+        
+        .strategy-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .strategy-name {
+            font-weight: 600;
+        }
+        
+        .strategy-confidence {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        
+        .strategy-details {
+            margin-bottom: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        
+        .detail-label {
+            width: 120px;
+            color: var(--secondary-text);
+            font-size: 13px;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+        }
+        
+        .strategy-rationale {
+            font-size: 13px;
+            color: var(--secondary-text);
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .scenario-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--hover-bg);
+            border-radius: 8px;
+        }
+        
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .scenario-title {
+            font-weight: 600;
+        }
+        
+        .scenario-probability {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background-color: rgba(0, 153, 255, 0.2);
+            color: var(--accent-color);
+        }
+        
+        .catalyst-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .catalyst-list {
+            list-style-type: none;
+            margin-left: 0;
+            padding-left: 0;
+        }
+        
+        .catalyst-list li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+            font-size: 13px;
+            color: var(--secondary-text);
+        }
+        
+        .catalyst-list li:before {
+            content: "•";
             position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+        
+        .loading {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: var(--primary-bg);
+            opacity: 0.9;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 9999;
         }
         
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            border: 4px solid rgba(0, 153, 255, 0.3);
             border-radius: 50%;
             border-top: 4px solid var(--accent-color);
             animation: spin 1s linear infinite;
@@ -438,30 +906,48 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Responsive styles */
+        /* Responsive layout */
         @media (max-width: 1200px) {
             .content {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto auto 1fr 1fr;
+                grid-template-rows: auto auto 1fr;
             }
             
-            .chart-container, .analysis-container {
-                grid-column: 1 / -1;
+            .chart-container, .news-container {
+                grid-column: 1 / 2;
             }
             
             .news-container {
-                grid-row: 4 / 5;
-                grid-column: 1 / -1;
+                grid-row: 3 / 4;
+            }
+            
+            .article-sidebar {
+                width: 100%;
+                right: -100%;
             }
         }
         
         @media (max-width: 768px) {
             .sidebar {
-                display: none;
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 100;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .search-container {
+                width: 200px;
             }
             
             .metrics-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .menu-toggle {
+                display: block;
             }
         }
     </style>
@@ -471,403 +957,107 @@
         <div class="spinner"></div>
     </div>
     
-    <header>
+    <header class="header">
         <div class="logo">
-            <i class="fas fa-chart-line"></i> StockVision Terminal
+            <i class="fas fa-chart-line logo-icon"></i>
         </div>
         
         <div class="search-container">
-            <input type="text" class="search-input" placeholder="Search stocks (e.g., AAPL, MSFT, GOOGL)...">
+            <input type="text" class="search-input" placeholder="Search for a symbol or company...">
+            <i class="fas fa-search search-icon"></i>
             <div class="search-results"></div>
         </div>
         
-        <div class="news-source-selector">
-            <div class="news-source-label">News Source:</div>
-            <select class="news-source-select">
-                <option value="google">Google News</option>
-                <option value="yahoo">Yahoo Finance</option>
-                <option value="market-watch">MarketWatch</option>
-                <option value="investing">Investing.com</option>
-            </select>
-        </div>
-        
-        <div class="date-time">
-            <div class="market-status">MARKET OPEN</div>
-            <div class="date">09 MAR 2025</div>
-            <div class="time">12:30:45</div>
+        <div class="header-right">
+            <button class="theme-toggle">
+                <i class="fas fa-sun"></i>
+            </button>
+            
+            <div class="date-time">
+                <div class="market-status">MARKET OPEN</div>
+                <div class="current-date">MAR 09, 2025</div>
+            </div>
         </div>
     </header>
     
     <div class="main-container">
         <div class="sidebar">
-            <div class="watchlist">
+            <div class="sidebar-section">
                 <div class="section-title">Watchlist</div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">AAPL</span>
-                    <div>
-                        <span class="stock-price">187.32</span>
-                        <span class="stock-change positive">+1.45%</span>
-                    </div>
-                </div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">MSFT</span>
-                    <div>
-                        <span class="stock-price">415.56</span>
-                        <span class="stock-change positive">+0.78%</span>
-                    </div>
-                </div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">GOOGL</span>
-                    <div>
-                        <span class="stock-price">175.23</span>
-                        <span class="stock-change negative">-0.32%</span>
-                    </div>
-                </div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">AMZN</span>
-                    <div>
-                        <span class="stock-price">178.25</span>
-                        <span class="stock-change positive">+1.20%</span>
-                    </div>
-                </div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">TSLA</span>
-                    <div>
-                        <span class="stock-price">186.75</span>
-                        <span class="stock-change negative">-2.15%</span>
-                    </div>
-                </div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">META</span>
-                    <div>
-                        <span class="stock-price">492.38</span>
-                        <span class="stock-change positive">+0.67%</span>
-                    </div>
-                </div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">NFLX</span>
-                    <div>
-                        <span class="stock-price">624.89</span>
-                        <span class="stock-change positive">+1.56%</span>
-                    </div>
-                </div>
-                <div class="watchlist-item">
-                    <span class="stock-symbol">JPM</span>
-                    <div>
-                        <span class="stock-price">195.64</span>
-                        <span class="stock-change negative">-0.18%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="content">
-            <div class="widget stock-header">
-                <div class="stock-title">
-                    <div class="stock-name">AAPL</div>
-                    <div class="stock-full-name">Apple Inc.</div>
-                </div>
-                <div class="stock-info">
-                    <div class="current-price">187.32</div>
-                    <div class="price-change positive">+2.70 (+1.45%)</div>
-                </div>
-            </div>
-            
-            <div class="widget chart-container">
-                <canvas id="priceChart"></canvas>
-            </div>
-            
-            <div class="widget news-container">
-                <div class="section-title">Latest News</div>
-                <div class="news-item">
-                    <div class="news-title">Apple's Next iPhone to Feature Enhanced AI Capabilities</div>
-                    <span class="news-source">TechCrunch</span>
-                    <span class="news-time">2 hours ago</span>
-                    <div class="news-credibility credibility-high">Credibility: High | Potential Impact: Positive</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Apple Supplier Reports Production Delays for New Components</div>
-                    <span class="news-source">Wall Street Journal</span>
-                    <span class="news-time">4 hours ago</span>
-                    <div class="news-credibility credibility-medium">Credibility: Medium | Potential Impact: Negative</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Analysts Raise Apple Price Target Citing Strong iPhone Demand</div>
-                    <span class="news-source">CNBC</span>
-                    <span class="news-time">6 hours ago</span>
-                    <div class="news-credibility credibility-high">Credibility: High | Potential Impact: Positive</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Apple's Services Revenue Growth Exceeds Expectations</div>
-                    <span class="news-source">Bloomberg</span>
-                    <span class="news-time">yesterday</span>
-                    <div class="news-credibility credibility-high">Credibility: High | Potential Impact: Positive</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Regulatory Challenges for Apple's App Store Could Impact Revenue</div>
-                    <span class="news-source">Reuters</span>
-                    <span class="news-time">yesterday</span>
-                    <div class="news-credibility credibility-medium">Credibility: Medium | Potential Impact: Negative</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Apple Announces New Campus Expansion Plan</div>
-                    <span class="news-source">Associated Press</span>
-                    <span class="news-time">2 days ago</span>
-                    <div class="news-credibility credibility-high">Credibility: High | Potential Impact: Neutral</div>
-                </div>
-                <div class="news-item">
-                    <div class="news-title">Apple's Market Share in China Shows Significant Growth</div>
-                    <span class="news-source">Financial Times</span>
-                    <span class="news-time">2 days ago</span>
-                    <div class="news-credibility credibility-high">Credibility: High | Potential Impact: Positive</div>
-                </div>
-            </div>
-            
-            <div class="widget analysis-container">
-                <div class="tab-container">
-                    <div class="tab active">Analysis</div>
-                    <div class="tab">Fundamentals</div>
-                    <div class="tab">Technicals</div>
-                </div>
-                <div class="tab-content">
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-title">P/E Ratio</div>
-                            <div class="metric-value">29.76</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Market Cap</div>
-                            <div class="metric-value">2.93T</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">52W High</div>
-                            <div class="metric-value">196.42</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">52W Low</div>
-                            <div class="metric-value">153.28</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Volume</div>
-                            <div class="metric-value">37.2M</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Avg Volume</div>
-                            <div class="metric-value">52.8M</div>
-                        </div>
-                    </div>
-                    
-                    <div class="prediction-container">
-                        <div class="prediction-title">AI Prediction</div>
-                        <div class="prediction-content">
-                            <div class="prediction-target">
-                                <div class="prediction-label">30-Day Target</div>
-                                <div class="prediction-value">198.45</div>
-                                <div class="trend-indicator trend-up">
-                                    <i class="fas fa-arrow-up"></i> +5.94%
-                                </div>
-                            </div>
-                            <div class="prediction-confidence">
-                                <div class="prediction-label">Confidence</div>
-                                <div class="prediction-value">76%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        // Initialize chart
-        const ctx = document.getElementById('priceChart').getContext('2d');
-        const priceChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Price',
-                    data: [],
-                    borderColor: '#0080ff',
-                    backgroundColor: 'rgba(0, 128, 255, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        grid: {
-                            color: '#222'
-                        },
-                        ticks: {
-                            color: '#999'
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: '#222'
-                        },
-                        ticks: {
-                            color: '#999'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
-                }
-            }
-        });
-        
-        // Mock data for the chart
-        function generateChartData() {
-            const today = new Date();
-            const labels = [];
-            const data = [];
-            let basePrice = 180;
-            
-            for (let i = 30; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(today.getDate() - i);
-                labels.push(moment(date).format('MMM D'));
                 
-                basePrice = basePrice + (Math.random() - 0.48) * 3;
-                data.push(basePrice.toFixed(2));
-            }
-            
-            return { labels, data };
-        }
-        
-        // Update chart with mock data
-        function updateChart() {
-            const { labels, data } = generateChartData();
-            priceChart.data.labels = labels;
-            priceChart.data.datasets[0].data = data;
-            priceChart.update();
-        }
-        
-        // Update time
-        function updateTime() {
-            const now = new Date();
-            document.querySelector('.time').textContent = now.toLocaleTimeString('en-US', { 
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            document.querySelector('.date').textContent = now.toLocaleDateString('en-US', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            }).toUpperCase();
-        }
-        
-        // Tab switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                // In a real app, this would load different content based on the selected tab
-            });
-        });
-        
-        // Search functionality
-        const searchInput = document.querySelector('.search-input');
-        const searchResults = document.querySelector('.search-results');
-        
-        // Mock stock data for search
-        const stocks = [
-            { symbol: 'AAPL', name: 'Apple Inc.' },
-            { symbol: 'MSFT', name: 'Microsoft Corporation' },
-            { symbol: 'GOOGL', name: 'Alphabet Inc.' },
-            { symbol: 'AMZN', name: 'Amazon.com Inc.' },
-            { symbol: 'META', name: 'Meta Platforms Inc.' },
-            { symbol: 'TSLA', name: 'Tesla, Inc.' },
-            { symbol: 'NVDA', name: 'NVIDIA Corporation' },
-            { symbol: 'NFLX', name: 'Netflix, Inc.' },
-            { symbol: 'JPM', name: 'JPMorgan Chase & Co.' },
-            { symbol: 'V', name: 'Visa Inc.' }
-        ];
-        
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            if (query.length < 1) {
-                searchResults.style.display = 'none';
-                return;
-            }
-            
-            const filteredStocks = stocks.filter(stock => 
-                stock.symbol.toLowerCase().includes(query) || 
-                stock.name.toLowerCase().includes(query)
-            );
-            
-            searchResults.innerHTML = '';
-            filteredStocks.forEach(stock => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                resultItem.textContent = `${stock.symbol} - ${stock.name}`;
-                resultItem.addEventListener('click', () => {
-                    // In a real app, this would load the selected stock
-                    document.querySelector('.stock-name').textContent = stock.symbol;
-                    document.querySelector('.stock-full-name').textContent = stock.name;
-                    updateChart(); // Generate new random data
-                    searchResults.style.display = 'none';
-                    searchInput.value = '';
-                });
-                searchResults.appendChild(resultItem);
-            });
-            
-            searchResults.style.display = filteredStocks.length > 0 ? 'block' : 'none';
-        });
-        
-        // Hide search results when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-                searchResults.style.display = 'none';
-            }
-        });
-        
-        // Initialize the app
-        function initApp() {
-            updateTime();
-            setInterval(updateTime, 1000);
-            updateChart();
-            
-            // Hide loading spinner
-            setTimeout(() => {
-                document.querySelector('.loading').style.display = 'none';
-            }, 1500);
-        }
-        
-        // Watchlist item click
-        document.querySelectorAll('.watchlist-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const symbol = this.querySelector('.stock-symbol').textContent;
-                const stockInfo = stocks.find(stock => stock.symbol === symbol);
+                <div class="watchlist-item" data-symbol="AAPL">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">AAPL</div>
+                        <div class="price">187.32</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">Apple Inc.</div>
+                        <div class="change positive">+1.45%</div>
+                    </div>
+                </div>
                 
-                if (stockInfo) {
-                    document.querySelector('.stock-name').textContent = stockInfo.symbol;
-                    document.querySelector('.stock-full-name').textContent = stockInfo.name;
-                    updateChart(); // Generate new random data
-                }
-            });
-        });
-        
-        window.addEventListener('load', initApp);
-    </script>
-</body>
-</html>
+                <div class="watchlist-item" data-symbol="MSFT">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">MSFT</div>
+                        <div class="price">415.56</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">Microsoft Corporation</div>
+                        <div class="change positive">+0.78%</div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item" data-symbol="GOOGL">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">GOOGL</div>
+                        <div class="price">175.23</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">Alphabet Inc.</div>
+                        <div class="change negative">-0.32%</div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item" data-symbol="AMZN">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">AMZN</div>
+                        <div class="price">178.25</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">Amazon.com Inc.</div>
+                        <div class="change positive">+1.20%</div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item" data-symbol="TSLA">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">TSLA</div>
+                        <div class="price">186.75</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">Tesla, Inc.</div>
+                        <div class="change negative">-2.15%</div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item" data-symbol="META">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">META</div>
+                        <div class="price">492.38</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">Meta Platforms Inc.</div>
+                        <div class="change positive">+0.67%</div>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item" data-symbol="NVDA">
+                    <div class="watchlist-item-top">
+                        <div class="ticker">NVDA</div>
+                        <div class="price">878.35</div>
+                    </div>
+                    <div class="watchlist-item-bottom">
+                        <div class="company-name">NVIDIA Corporation</div>
+                        <div class="change positive">+2.34%</div>
+                    </div>
+                </div>
