@@ -3,915 +3,825 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockVision - Market Analysis Platform</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>LectureNotes - Intelligent Lecture Transcription</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-bg: #1a1a1a;
-            --secondary-bg: #222222;
-            --terminal-bg: #0d1117;
-            --accent-color: #2a9d8f;
-            --text-primary: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --text-green: #4caf50;
-            --text-red: #f44336;
-            --border-color: #333333;
-            --highlight: #264f78;
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --background: #F9FAFB;
+            --card: #FFFFFF;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --border: #E5E7EB;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Courier New', monospace;
+        /* Dark mode variables */
+        .dark-mode {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --background: #111827;
+            --card: #1F2937;
+            --text: #F9FAFB;
+            --text-light: #D1D5DB;
+            --border: #374151;
         }
 
         body {
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-            overflow-x: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
         }
 
         .container {
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            grid-template-rows: 60px 1fr;
-            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
 
-        /* Header */
-        .header {
-            grid-column: 1 / 3;
-            background-color: var(--terminal-bg);
-            border-bottom: 1px solid var(--border-color);
+        header {
+            background-color: var(--card);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-content {
             display: flex;
-            align-items: center;
-            padding: 0 20px;
             justify-content: space-between;
+            align-items: center;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            font-weight: bold;
-            font-size: 1.4rem;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
         }
 
-        .logo span {
-            color: var(--accent-color);
-        }
-
-        .search-container {
-            flex: 1;
-            margin: 0 20px;
-            max-width: 600px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            padding: 8px 15px;
-            color: var(--text-primary);
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-top: none;
-            z-index: 10;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .search-result-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .search-result-item:hover {
-            background-color: var(--highlight);
-        }
-
-        .search-result-symbol {
-            font-weight: bold;
-            margin-right: 10px;
+        .logo i {
+            font-size: 1.5rem;
         }
 
         .user-menu {
             display: flex;
+            gap: 1rem;
             align-items: center;
         }
 
         .user-menu button {
-            background-color: var(--accent-color);
-            color: #fff;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            margin-left: 10px;
+            background: none;
             cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background-color: var(--secondary-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 20px 0;
-            overflow-y: auto;
-        }
-
-        .sidebar-section {
-            margin-bottom: 20px;
-        }
-
-        .sidebar-section h3 {
-            padding: 0 20px;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        .sidebar-item {
-            padding: 10px 20px;
+            color: var(--text-light);
+            font-size: 1rem;
             display: flex;
             align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .user-menu button:hover {
+            background-color: var(--background);
+            color: var(--text);
+        }
+
+        main {
+            padding: 2rem 0;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .recording-section h2, 
+        .notes-section h2 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
         }
 
-        .sidebar-item:hover {
-            background-color: var(--highlight);
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
         }
 
-        .sidebar-item i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
         }
 
-        .market-status {
-            padding: 10px 20px;
-            margin-top: 20px;
-            border-top: 1px solid var(--border-color);
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--background);
+        }
+        
+        .btn-recording {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .btn-recording:hover {
+            background-color: #DC2626;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            background-color: var(--background);
         }
 
         .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 0.75rem;
+            height: 0.75rem;
             border-radius: 50%;
-            margin-right: 5px;
+            background-color: var(--text-light);
         }
 
-        .status-live {
-            background-color: var(--text-green);
+        .status-indicator.active {
+            background-color: var(--error);
+            animation: pulse 1.5s infinite;
         }
 
-        .status-closed {
-            background-color: var(--text-red);
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
         }
 
-        /* Main Content */
-        .main-content {
-            padding: 20px;
+        .transcript-container,
+        .notes-container {
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            height: 400px;
             overflow-y: auto;
-            display: grid;
-            grid-template-rows: auto 1fr;
-            gap: 20px;
+            background-color: var(--background);
         }
 
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: auto auto 1fr;
-            gap: 20px;
-            height: 100%;
+        .transcript-text,
+        .notes-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
         }
 
-        .dashboard-card {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+        .transcript-text {
+            color: var(--text-light);
         }
 
-        .card-header {
-            background-color: var(--terminal-bg);
-            padding: 10px 15px;
-            font-weight: bold;
+        .notes-text {
+            color: var(--text);
+        }
+
+        .notes-text h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .notes-text ul {
+            padding-left: 1.5rem;
+        }
+
+        .notes-text li {
+            margin-bottom: 0.5rem;
+        }
+
+        .notes-actions {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
+            margin-top: 1rem;
         }
 
-        .card-header-actions i {
-            margin-left: 10px;
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-
-        .card-header-actions i:hover {
-            color: var(--text-primary);
-        }
-
-        .card-content {
-            padding: 15px;
-            flex: 1;
-            overflow: auto;
-        }
-
-        /* Stock Overview */
-        .stock-overview-card {
-            grid-column: 1 / 4;
-            grid-row: 1 / 2;
-        }
-
-        .stock-info {
+        .tab-container {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
         }
 
-        .stock-name-price {
-            flex: 1;
-        }
-
-        .stock-symbol {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-
-        .stock-company {
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .stock-price {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .stock-change {
-            font-size: 1rem;
-        }
-
-        .positive {
-            color: var(--text-green);
-        }
-
-        .negative {
-            color: var(--text-red);
-        }
-
-        .stock-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .meta-item {
-            min-width: 120px;
-        }
-
-        .meta-label {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-        }
-
-        .meta-value {
-            font-weight: bold;
-        }
-
-        /* Chart Card */
-        .chart-card {
-            grid-column: 1 / 3;
-            grid-row: 2 / 4;
-        }
-
-        .chart-container {
-            width: 100%;
-            height: 100%;
-            min-height: 300px;
-        }
-
-        .chart-controls {
-            display: flex;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        .chart-control-group {
-            margin-right: 20px;
-        }
-
-        .chart-control-label {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-        }
-
-        .chart-control-buttons {
-            display: flex;
-        }
-
-        .chart-btn {
-            background-color: var(--terminal-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .chart-btn:first-child {
-            border-radius: 4px 0 0 4px;
-        }
-
-        .chart-btn:last-child {
-            border-radius: 0 4px 4px 0;
-        }
-
-        .chart-btn.active {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-
-        /* News Card */
-        .news-card {
-            grid-column: 3 / 4;
-            grid-row: 2 / 4;
-        }
-
-        .news-item {
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .news-item:last-child {
-            border-bottom: none;
-        }
-
-        .news-time {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-        }
-
-        .news-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .news-source {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .news-sentiment {
-            font-size: 0.8rem;
-            margin-top: 5px;
-            padding: 2px 5px;
-            border-radius: 3px;
-            display: inline-block;
-        }
-
-        .sentiment-positive {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: var(--text-green);
-        }
-
-        .sentiment-negative {
-            background-color: rgba(244, 67, 54, 0.2);
-            color: var(--text-red);
-        }
-
-        .sentiment-neutral {
-            background-color: rgba(255, 152, 0, 0.2);
-            color: #ff9800;
-        }
-
-        /* Technical Indicators */
-        .indicators-card {
-            grid-column: 1 / 4;
-            grid-row: 4 / 5;
-        }
-
-        .indicators-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 15px;
-        }
-
-        .indicator-tab {
-            padding: 10px 15px;
+        .tab {
+            padding: 0.75rem 1rem;
             cursor: pointer;
             border-bottom: 2px solid transparent;
         }
 
-        .indicator-tab.active {
-            border-bottom-color: var(--accent-color);
-            color: var(--accent-color);
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 500;
         }
 
-        .indicator-panels {
+        .settings-section {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .settings-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .setting-item {
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
-        .indicator-item {
-            background-color: var(--terminal-bg);
-            padding: 15px;
-            border-radius: 4px;
-            min-width: 200px;
-            flex: 1;
+        .setting-item label {
+            font-weight: 500;
+            font-size: 0.875rem;
         }
 
-        .indicator-name {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
+        .setting-item select,
+        .setting-item input {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+            background-color: var(--card);
+            color: var(--text);
         }
 
-        .indicator-value {
-            font-size: 1.4rem;
-            font-weight: bold;
+        footer {
+            background-color: var(--card);
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border);
         }
 
-        .indicator-signal {
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* Prediction Card */
-        .prediction-card {
-            grid-column: 1 / 4;
-            grid-row: 5 / 6;
-        }
-
-        .prediction-content {
+        .footer-content {
             display: flex;
-            gap: 20px;
-        }
-
-        .prediction-chart {
-            flex: 2;
-            min-height: 200px;
-        }
-
-        .prediction-analysis {
-            flex: 1;
-            background-color: var(--terminal-bg);
-            padding: 15px;
-            border-radius: 4px;
-        }
-
-        .prediction-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .prediction-value {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .confidence-meter {
-            height: 8px;
-            background-color: var(--border-color);
-            border-radius: 4px;
-            margin-bottom: 5px;
-            overflow: hidden;
-        }
-
-        .confidence-value {
-            height: 100%;
-            background-color: var(--accent-color);
-        }
-
-        .prediction-factors {
-            margin-top: 20px;
-        }
-
-        .prediction-factor {
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        .factor-impact {
-            font-weight: bold;
-        }
-
-        .impact-high {
-            color: var(--text-green);
-        }
-
-        .impact-medium {
-            color: #ff9800;
-        }
-
-        .impact-low {
-            color: var(--text-red);
-        }
-
-        /* Loading overlay */
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            z-index: 1000;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .highlight {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            padding: 0 0.25rem;
+            border-radius: 0.25rem;
+        }
+
+        .loading-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-light);
+            margin-top: 1rem;
         }
 
         .spinner {
-            border: 5px solid rgba(0, 0, 0, 0.1);
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
             border-radius: 50%;
-            border-top: 5px solid var(--accent-color);
-            width: 50px;
-            height: 50px;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Placeholder */
-        .placeholder-text {
-            color: var(--text-secondary);
-            text-align: center;
-            padding: 50px 0;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .stock-overview-card {
-                grid-column: 1 / 3;
-            }
-
-            .chart-card {
-                grid-column: 1 / 3;
-                grid-row: 2 / 3;
-            }
-
-            .news-card {
-                grid-column: 1 / 3;
-                grid-row: 3 / 4;
-            }
-
-            .indicators-card, .prediction-card {
-                grid-column: 1 / 3;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                grid-template-rows: 60px 1fr;
-            }
-
-            .header {
-                grid-column: 1 / 2;
-            }
-
-            .sidebar {
-                display: none;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stock-overview-card, .chart-card, .news-card, .indicators-card, .prediction-card {
-                grid-column: 1 / 2;
-            }
-
-            .prediction-content {
-                flex-direction: column;
+            to {
+                transform: rotate(360deg);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">STOCK<span>VISION</span></div>
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search for stocks (e.g., AAPL, MSFT, GOOGL)" id="searchInput">
-                <div class="search-results" id="searchResults"></div>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-microphone-alt"></i>
+                <span>LectureNotes</span>
             </div>
             <div class="user-menu">
-                <button id="apiKeyBtn"><i class="fas fa-key"></i> API Key</button>
+                <button id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                    <span>Dark Mode</span>
+                </button>
+                <button id="settings-button">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </button>
             </div>
-        </header>
-
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-section">
-                <h3>Watchlists</h3>
-                <div class="sidebar-item">
-                    <i class="fas fa-star"></i> Default Watchlist
-                </div>
-                <div class="sidebar-item">
-                    <i class="fas fa-plus"></i> Create Watchlist
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>Markets</h3>
-                <div class="sidebar-item">
-                    <i class="fas fa-chart-line"></i> US Market
-                </div>
-                <div class="sidebar-item">
-                    <i class="fas fa-globe-americas"></i> Global Markets
-                </div>
-                <div class="sidebar-item">
-                    <i class="fab fa-bitcoin"></i> Cryptocurrencies
-                </div>
-                <div class="sidebar-item">
-                    <i class="fas fa-money-bill-wave"></i> Forex
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>Analysis</h3>
-                <div class="sidebar-item active">
-                    <i class="fas fa-chart-bar"></i> Technical Analysis
-                </div>
-                <div class="sidebar-item">
-                    <i class="fas fa-balance-scale"></i> Fundamental Analysis
-                </div>
-                <div class="sidebar-item">
-                    <i class="fas fa-robot"></i> AI Predictions
-                </div>
-                <div class="sidebar-item">
-                    <i class="fas fa-newspaper"></i> News Analyzer
-                </div>
-            </div>
-
-            <div class="market-status">
-                <span class="status-indicator status-live"></span>
-                <span id="marketStatusText">Market Open</span>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="dashboard-grid">
-                <!-- Stock Overview Card -->
-                <div class="dashboard-card stock-overview-card">
-                    <div class="card-header">
-                        <div>Stock Overview</div>
-                        <div class="card-header-actions">
-                            <i class="fas fa-sync-alt" id="refreshOverview"></i>
-                            <i class="fas fa-ellipsis-v"></i>
-                        </div>
-                    </div>
-                    <div class="card-content" id="stockOverviewContent">
-                        <div class="placeholder-text">
-                            <i class="fas fa-search fa-3x"></i>
-                            <p>Search for a stock symbol to see detailed information</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chart Card -->
-                <div class="dashboard-card chart-card">
-                    <div class="card-header">
-                        <div>Price Chart</div>
-                        <div class="card-header-actions">
-                            <i class="fas fa-expand"></i>
-                            <i class="fas fa-ellipsis-v"></i>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <div class="chart-controls">
-                            <div class="chart-control-group">
-                                <span class="chart-control-label">Interval</span>
-                                <div class="chart-control-buttons">
-                                    <button class="chart-btn" data-interval="5min">5m</button>
-                                    <button class="chart-btn" data-interval="15min">15m</button>
-                                    <button class="chart-btn" data-interval="30min">30m</button>
-                                    <button class="chart-btn" data-interval="60min">1h</button>
-                                    <button class="chart-btn active" data-interval="daily">1d</button>
-                                    <button class="chart-btn" data-interval="weekly">1w</button>
-                                </div>
-                            </div>
-                            <div class="chart-control-group">
-                                <span class="chart-control-label">Type</span>
-                                <div class="chart-control-buttons">
-                                    <button class="chart-btn active" data-type="line">Line</button>
-                                    <button class="chart-btn" data-type="candle">Candle</button>
-                                    <button class="chart-btn" data-type="area">Area</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart-container" id="priceChart">
-                            <div class="placeholder-text">
-                                <i class="fas fa-chart-line fa-3x"></i>
-                                <p>Chart will appear when you select a stock</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- News Card -->
-                <div class="dashboard-card news-card">
-                    <div class="card-header">
-                        <div>News & Sentiment Analysis</div>
-                        <div class="card-header-actions">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </div>
-                    </div>
-                    <div class="card-content" id="newsContent">
-                        <div class="placeholder-text">
-                            <i class="fas fa-newspaper fa-3x"></i>
-                            <p>Latest news will appear here</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Technical Indicators Card -->
-                <div class="dashboard-card indicators-card">
-                    <div class="card-header">
-                        <div>Technical Indicators</div>
-                        <div class="card-header-actions">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <div class="indicators-tabs">
-                            <div class="indicator-tab active" data-tab="momentum">Momentum</div>
-                            <div class="indicator-tab" data-tab="trend">Trend</div>
-                            <div class="indicator-tab" data-tab="volatility">Volatility</div>
-                            <div class="indicator-tab" data-tab="volume">Volume</div>
-                        </div>
-                        <div class="indicator-panels" id="indicatorPanels">
-                            <div class="placeholder-text">
-                                <i class="fas fa-chart-bar fa-3x"></i>
-                                <p>Technical indicators will be calculated when you select a stock</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Prediction Card -->
-                <div class="dashboard-card prediction-card">
-                    <div class="card-header">
-                        <div>Price Prediction & Analysis</div>
-                        <div class="card-header-actions">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <div class="prediction-content" id="predictionContent">
-                            <div class="placeholder-text">
-                                <i class="fas fa-robot fa-3x"></i>
-                                <p>AI-powered price predictions will appear when you select a stock</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- API Key Modal (hidden by default) -->
-    <div id="apiKeyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: var(--secondary-bg); padding: 20px; border-radius: 5px; width: 90%; max-width: 500px;">
-            <h3 style="margin-bottom: 15px;">Set Alpha Vantage API Key</h3>
-            <p style="margin-bottom: 15px; color: var(--text-secondary);">Enter your Alpha Vantage API key to start fetching real market data.</p>
-            <input type="text" id="apiKeyInput" style="width: 100%; padding: 10px; margin-bottom: 15px; background: var(--terminal-bg); border: 1px solid var(--border-color); color: var(--text-primary);" placeholder="Enter your API key">
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button id="cancelApiKey" style="padding: 8px 15px; background: var(--terminal-bg); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">Cancel</button>
-                <button id="saveApiKey" style="padding: 8px 15px; background: var(--accent-color); border: none; color: white; cursor: pointer;">Save</button>
-            </div>
-            <p style="margin-top: 15px; font-size: 0.8rem; color: var(--text-secondary);">Don't have an API key? <a href="https://www.alphavantage.co/support/#api-key" target="_blank" style="color: var(--accent-color);">Get a free API key</a></p>
         </div>
-    </div>
+    </header>
 
-    <!-- Loading Overlay (hidden by default) -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="spinner"></div>
-    </div>
+    <main class="container">
+        <div class="app-container">
+            <div class="recording-section">
+                <div class="card">
+                    <h2>
+                        <i class="fas fa-microphone"></i>
+                        Lecture Recording
+                    </h2>
+                    <div class="controls">
+                        <button id="start-recording" class="btn btn-primary">
+                            <i class="fas fa-play"></i>
+                            Start Recording
+                        </button>
+                        <button id="stop-recording" class="btn btn-outline" disabled>
+                            <i class="fas fa-stop"></i>
+                            Stop
+                        </button>
+                    </div>
+                    <div class="status">
+                        <div id="status-indicator" class="status-indicator"></div>
+                        <span id="status-text">Waiting to start...</span>
+                    </div>
+                    <div class="tab-container">
+                        <div class="tab active" data-tab="live">Live Transcription</div>
+                        <div class="tab" data-tab="history">History</div>
+                    </div>
+                    <div class="transcript-container">
+                        <div id="transcript-text" class="transcript-text">
+                            Your lecture transcription will appear here as you speak...
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+            <div class="notes-section">
+                <div class="card">
+                    <h2>
+                        <i class="fas fa-book"></i>
+                        Smart Notes
+                    </h2>
+                    <div class="tab-container">
+                        <div class="tab active" data-tab="formatted">Formatted</div>
+                        <div class="tab" data-tab="outline">Outline</div>
+                        <div class="tab" data-tab="summary">Summary</div>
+                    </div>
+                    <div class="notes-container">
+                        <div id="notes-text" class="notes-text">
+                            <p>When you start recording, intelligent notes will be generated here based on the lecture content.</p>
+                            <p>The AI will:</p>
+                            <ul>
+                                <li>Organize content into logical sections</li>
+                                <li>Extract key points and concepts</li>
+                                <li>Format with headings and bullet points</li>
+                                <li>Highlight important definitions and formulas</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="loading-indicator" id="loading-indicator">
+                        <div class="spinner"></div>
+                        <span>Generating smart notes...</span>
+                    </div>
+                    <div class="notes-actions">
+                        <button id="regenerate" class="btn btn-outline">
+                            <i class="fas fa-redo"></i>
+                            Regenerate
+                        </button>
+                        <button id="download-notes" class="btn btn-primary">
+                            <i class="fas fa-download"></i>
+                            Download Notes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="card">
+                <h2>
+                    <i class="fas fa-sliders-h"></i>
+                    Settings
+                </h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="language-select">Speech Recognition Language</label>
+                        <select id="language-select">
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="fr-FR">French</option>
+                            <option value="de-DE">German</option>
+                            <option value="zh-CN">Chinese (Simplified)</option>
+                            <option value="ja-JP">Japanese</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="notes-style">Notes Style</label>
+                        <select id="notes-style">
+                            <option value="comprehensive">Comprehensive</option>
+                            <option value="concise">Concise</option>
+                            <option value="bullet-points">Bullet Points Only</option>
+                            <option value="question-answer">Question & Answer</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="highlight-terms">Highlight Key Terms</label>
+                        <input type="checkbox" id="highlight-terms" checked>
+                    </div>
+                    <div class="setting-item">
+                        <label for="auto-generate">Generate Notes Automatically</label>
+                        <input type="checkbox" id="auto-generate" checked>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div>
+                <p>&copy; 2025 LectureNotes. All rights reserved.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Help</a>
+            </div>
+        </div>
+    </footer>
+
     <script>
         // DOM Elements
-        const searchInput = document.getElementById('searchInput');
-        const searchResults = document.getElementById('searchResults');
-        const stockOverviewContent = document.getElementById('stockOverviewContent');
-        const priceChart = document.getElementById('priceChart');
-        const newsContent = document.getElementById('newsContent');
-        const indicatorPanels = document.getElementById('indicatorPanels');
-        const predictionContent = document.getElementById('predictionContent');
-        const apiKeyBtn = document.getElementById('apiKeyBtn');
-        const apiKeyModal = document.getElementById('apiKeyModal');
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const saveApiKeyBtn = document.getElementById('saveApiKey');
-        const cancelApiKeyBtn = document.getElementById('cancelApiKey');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const marketStatusText = document.getElementById('marketStatusText');
-        const refreshOverviewBtn = document.getElementById('refreshOverview');
+        const startRecordingBtn = document.getElementById('start-recording');
+        const stopRecordingBtn = document.getElementById('stop-recording');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const transcriptText = document.getElementById('transcript-text');
+        const notesText = document.getElementById('notes-text');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const downloadNotesBtn = document.getElementById('download-notes');
+        const regenerateBtn = document.getElementById('regenerate');
+        const tabs = document.querySelectorAll('.tab');
+        const themeToggle = document.getElementById('theme-toggle');
+        const settingsButton = document.getElementById('settings-button');
 
-        // Chart variables
-        let priceChartInstance = null;
-        let currentSymbol = null;
-        let currentInterval = 'daily';
-        let currentChartType = 'line';
+        // Variables for speech recognition
+        let recognition = null;
+        let isRecording = false;
+        let transcript = '';
 
-        // API Key handling
-        apiKeyBtn.addEventListener('click', () => {
-            apiKeyModal.style.display = 'flex';
-            apiKeyInput.value = localStorage.getItem('alphavantageApiKey') || '';
-        });
+        // Check if the browser supports the Web Speech API
+        function initSpeechRecognition() {
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = document.getElementById('language-select').value;
 
-        saveApiKeyBtn.addEventListener('click', () => {
-            const apiKey = apiKeyInput.value.trim();
-            localStorage.setItem('alphavantageApiKey', apiKey);
-            apiKeyModal.style.display = 'none';
-            showNotification('API key saved successfully');
-        });
+                recognition.onstart = function() {
+                    isRecording = true;
+                    statusIndicator.classList.add('active');
+                    statusText.textContent = 'Recording...';
+                    transcriptText.textContent = 'Listening...';
+                    startRecordingBtn.classList.add('btn-recording');
+                    startRecordingBtn.innerHTML = '<i class="fas fa-microphone"></i> Recording...';
+                    stopRecordingBtn.disabled = false;
+                };
 
-        cancelApiKeyBtn.addEventListener('click', () => {
-            apiKeyModal.style.display = 'none';
-        });
+                recognition.onresult = function(event) {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
 
-        // Create notification function
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.style.position = 'fixed';
-            notification.style.bottom = '20px';
-            notification.style.right = '20px';
-            notification.style.backgroundColor = type === 'error' ? '#f44336' : '#2a9d8f';
-            notification.style.color = 'white';
-            notification.style.padding = '10px 20px';
-            notification.style.borderRadius = '4px';
-            notification.style.zIndex = '1001';
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => document.body.removeChild(notification), 500);
-            }, 3000);
-        }
-        
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-        }
-        
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-        
-        function displaySearchResults(matches) {
-            searchResults.innerHTML = '';
-            
-            matches.forEach(match => {
-                const symbol = match['1. symbol'];
-                const name = match['2. name'];
-                const type = match['3. type'];
-                const region = match['4. region'];
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        if (result.isFinal) {
+                            finalTranscript += result[0].transcript + ' ';
+                        } else {
+                            interimTranscript += result[0].transcript;
+                        }
+                    }
+
+                    transcript += finalTranscript;
+                    transcriptText.innerHTML = transcript + '<span style="color: var(--text-light);">' + interimTranscript + '</span>';
+
+                    // Generate notes after a certain amount of transcript is collected
+                    if (finalTranscript && document.getElementById('auto-generate').checked) {
+                        generateNotes();
+                    }
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    statusText.textContent = 'Error: ' + event.error;
+                    stopRecording();
+                };
+
+                recognition.onend = function() {
+                    if (isRecording) {
+                        // If still recording, restart recognition (to handle timeout)
+                        recognition.start();
+                    }
+                };
                 
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                resultItem.innerHTML = `
-                    <span class="search-result-symbol">${symbol}</span>
-                    <span>${name}</span>
-                    <span style="color: var(--text-secondary); margin-left: 10px; font-size: 0.
+                return true;
+            } else {
+                // Browser doesn't support speech recognition
+                startRecordingBtn.disabled = true;
+                statusText.textContent = 'Speech recognition not supported in this browser.';
+                transcriptText.textContent = 'Your browser does not support the Web Speech API. Please try using Chrome.';
+                return false;
+            }
+        }
+
+        // Initialize speech recognition if available
+        const speechRecognitionAvailable = initSpeechRecognition();
+
+        // Start recording
+        startRecordingBtn.addEventListener('click', function() {
+            if (!isRecording && speechRecognitionAvailable) {
+                try {
+                    recognition.lang = document.getElementById('language-select').value;
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting recognition:', error);
+                }
+            }
+        });
+
+        // Stop recording
+        stopRecordingBtn.addEventListener('click', stopRecording);
+
+        function stopRecording() {
+            if (isRecording && recognition) {
+                recognition.stop();
+                isRecording = false;
+                statusIndicator.classList.remove('active');
+                statusText.textContent = 'Recording stopped';
+                startRecordingBtn.classList.remove('btn-recording');
+                startRecordingBtn.innerHTML = '<i class="fas fa-play"></i> Start Recording';
+                stopRecordingBtn.disabled = true;
+
+                // Generate final notes
+                generateNotes(true);
+            }
+        }
+
+        // Generate notes from transcript
+        function generateNotes(isFinal = false) {
+            if (transcript.trim().length < 20 && !isFinal) return;
+
+            loadingIndicator.style.display = 'flex';
+
+            // Simulating AI processing with a timeout
+            setTimeout(() => {
+                let highlightTerms = document.getElementById('highlight-terms').checked;
+                let notesStyle = document.getElementById('notes-style').value;
+                
+                // This would be replaced with actual AI processing in a real app
+                const formattedNotes = processTranscriptToNotes(transcript, notesStyle, highlightTerms);
+                notesText.innerHTML = formattedNotes;
+                loadingIndicator.style.display = 'none';
+            }, 1500);
+        }
+
+        // Process transcript to formatted notes (simplified simulation)
+        function processTranscriptToNotes(text, style, highlight) {
+            if (!text || text.trim() === '') {
+                return '<p>Start recording to generate notes.</p>';
+            }
+
+            // This is a simplistic simulation. In a real app, this would be handled by an AI service
+            
+            // Extract a fake title from the first sentence
+            const firstSentenceEnd = text.indexOf('.');
+            let title = firstSentenceEnd > 0 ? 
+                        text.substring(0, firstSentenceEnd > 30 ? 30 : firstSentenceEnd).trim() : 
+                        "Lecture Notes";
+            if (title.length < 10) title = "Lecture Notes";
+            
+            let notes = '';
+            
+            // Create a basic structure based on notes style
+            switch (style) {
+                case 'concise':
+                    notes = `<h3>${title}</h3>
+                    <p>Key points:</p>
+                    <ul>
+                        <li>The lecture discusses ${title.toLowerCase()} and its implications.</li>
+                        <li>Several important concepts are introduced including theoretical frameworks.</li>
+                        <li>Methods and applications are explored in detail.</li>
+                    </ul>`;
+                    break;
+                    
+                case 'bullet-points':
+                    notes = `<h3>${title}</h3>
+                    <ul>
+                        <li>Introduction to the topic</li>
+                        <li>Theoretical background</li>
+                        <li>Main concepts:
+                            <ul>
+                                <li>Primary elements</li>
+                                <li>Secondary factors</li>
+                                <li>Relationships between components</li>
+                            </ul>
+                        </li>
+                        <li>Applications and examples</li>
+                        <li>Summary of key takeaways</li>
+                    </ul>`;
+                    break;
+                    
+                case 'question-answer':
+                    notes = `<h3>${title}</h3>
+                    <p><strong>Q: What is the main topic of the lecture?</strong></p>
+                    <p>A: The lecture focuses on ${title.toLowerCase()}.</p>
+                    <p><strong>Q: What are the key components discussed?</strong></p>
+                    <p>A: The lecture covers theoretical frameworks, methodologies, and practical applications.</p>
+                    <p><strong>Q: How does this relate to the broader field?</strong></p>
+                    <p>A: This topic connects to larger concepts within the discipline and has real-world implications.</p>`;
+                    break;
+                    
+                default: // comprehensive
+                    notes = `<h3>${title}</h3>
+                    <p>The lecture begins with an introduction to ${title.toLowerCase()}, establishing the context and importance of the topic. The speaker presents several key concepts that form the foundation of the discussion.</p>
+                    <h4>Key Concepts</h4>
+                    <ul>
+                        <li>Theoretical framework and background</li>
+                        <li>Methodological approaches</li>
+                        <li>Practical applications</li>
+                    </ul>
+                    <h4>Important Relationships</h4>
+                    <p>The relationships between these concepts are explored, with emphasis on how they interact in various contexts.</p>
+                    <h4>Examples & Applications</h4>
+                    <p>Several examples are provided to illustrate the practical implementation of these ideas.</p>
+                    <h4>Conclusion</h4>
+                    <p>The lecture concludes by summarizing the key points and suggesting future directions for exploration.</p>`;
+            }
+            
+            // Add highlighting if enabled
+            if (highlight) {
+                // Identify some "key terms" from the text (this is simplified)
+                const potentialTerms = ['theory', 'concept', 'method', 'analysis', 'research', 'data', 'model', 
+                                        'framework', 'structure', 'function', 'process', 'system', 'development',
+                                        'application', 'example'];
+                
+                // Find words that appear in both the transcript and our potential terms list
+                const termsToHighlight = potentialTerms.filter(term => 
+                    text.toLowerCase().includes(term.toLowerCase())
+                );
+                
+                // Highlight these terms in the notes
+                termsToHighlight.forEach(term => {
+                    const regex = new RegExp(`\\b${term}\\b`, 'gi');
+                    notes = notes.replace(regex, `<span class="highlight">$&</span>`);
+                });
+            }
+            
+            return notes;
+        }
+
+        // Download notes
+        downloadNotesBtn.addEventListener('click', function() {
+            const notesContent = notesText.innerHTML;
+            const blob = new Blob([`<html><head><title>Lecture Notes</title><style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+                h3 { color: #4F46E5; }
+                .highlight { background-color: #EEF2FF; color: #4F46E5; padding: 0 3px; border-radius: 3px; }
+            </style></head><body>${notesContent}</body></html>`], { type: 'text/html' });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lecture-notes.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // Regenerate notes
+        regenerateBtn.addEventListener('click', function() {
+            if (transcript) {
+                generateNotes(true);
+            }
+        });
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabContainer = this.closest('.tab-container');
+                const activeTab = tabContainer.querySelector('.active');
+                activeTab.classList.remove('active');
+                this.classList.add('active');
+                
+                // Here you would typically switch the content based on the selected tab
+                // For this demo, we'll just keep it simple
+            });
+        });
+
+        // Show/hide settings section
+        settingsButton.addEventListener('click', function() {
+            const settingsSection = document.querySelector('.settings-section');
+            settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Dark mode toggle
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const icon = themeToggle.querySelector('i');
+            if (icon.classList.contains('fa-moon')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                themeToggle.querySelector('span').textContent = 'Light Mode';
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                themeToggle.querySelector('span').textContent = 'Dark Mode';
+            }
+        });
+
+        // Language select change
+        document.getElementById('language-select').addEventListener('change', function() {
+            if (recognition) {
+                recognition.lang = this.value;
+            }
+        });
+
+        // Initialize settings display
+        document.querySelector('.settings-section').style.display = 'none';
+    </script>
+</body>
+</html>
